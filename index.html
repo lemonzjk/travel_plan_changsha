@@ -8,7 +8,6 @@
   <title>长沙 · 湘江慢游</title>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQn0M6yOGz8CkPzBz8cYQ7KQ2p3pqtM=" crossorigin="">
   <style>
     :root {
       --ink: #17211d;
@@ -304,49 +303,48 @@
     .disclaimer svg { width: 18px; height: 18px; flex: 0 0 auto; color: var(--gold); }
     .disclaimer p { margin: 0; }
 
-    .map-shell { overflow: hidden; min-height: 395px; padding: 0; }
-    #map { width: 100%; min-height: 395px; background: linear-gradient(145deg, #e4eee7, #cce1dc); }
-    .route-pin { display: grid; place-items: center; border: 2px solid white; border-radius: 50%; color: white; background: var(--accent); box-shadow: 0 4px 12px rgba(172, 44, 32, 0.34); }
-    .route-pin__num { font-size: 12px; font-weight: 750; }
-    .leaflet-popup-content { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 13px; }
-    .leaflet-popup-content a { color: var(--accent-dark); font-weight: 700; }
-    .map-fallback { display: grid; min-height: 395px; place-items: center; padding: 24px; color: var(--muted); text-align: center; }
-
-    .day-rail {
+    .day-controller {
       display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: none;
+      margin-bottom: 17px;
     }
 
-    .day-rail::-webkit-scrollbar { display: none; }
-    .day-jump {
+    .day-state { min-width: 0; flex: 1; text-align: center; }
+    .day-state strong { display: block; font-size: 15px; line-height: 1.2; }
+    .day-state span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .day-dots { display: flex; justify-content: center; gap: 5px; margin-top: 7px; }
+    .day-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(100, 115, 109, 0.28); }
+    .day-dot.is-active { width: 18px; border-radius: 6px; background: var(--accent); }
+
+    .icon-button {
+      position: relative;
       display: inline-grid;
-      min-width: 43px;
-      height: 37px;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
       place-items: center;
-      padding: 0 9px;
       border: 1px solid var(--line);
-      border-radius: 9px;
+      border-radius: 11px;
       color: var(--muted);
       background: rgba(255, 255, 255, 0.42);
-      font-size: 12px;
-      font-weight: 700;
       transition: transform 160ms ease, background 160ms ease, color 160ms ease;
     }
 
-    .day-jump:hover, .day-jump.is-active { color: white; border-color: var(--accent); background: var(--accent); transform: translateY(-1px); }
+    .icon-button svg { width: 19px; height: 19px; }
+    .icon-button:hover:not(:disabled) { color: white; border-color: var(--accent); background: var(--accent); transform: translateY(-1px); }
+    .icon-button:disabled { cursor: not-allowed; opacity: 0.32; }
+    .icon-button::after { position: absolute; z-index: 4; top: calc(100% + 7px); left: 50%; padding: 5px 7px; border-radius: 6px; content: attr(data-tooltip); color: white; background: rgba(23, 33, 29, 0.9); font-size: 11px; line-height: 1; opacity: 0; pointer-events: none; transform: translate(-50%, -3px); transition: opacity 120ms ease, transform 120ms ease; white-space: nowrap; }
+    .icon-button:hover::after, .icon-button:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 
-    .day-list { display: grid; gap: 18px; }
+    .day-list { min-height: 500px; }
 
     .day-block {
       position: relative;
       padding-top: 4px;
       scroll-margin-top: 85px;
     }
-
-    .day-block + .day-block { padding-top: 24px; border-top: 1px solid var(--line); }
 
     .day-head {
       display: flex;
@@ -419,6 +417,10 @@
     .meta-list svg { width: 13px; height: 13px; color: var(--mint); }
     .rating { color: #875512 !important; background: rgba(255, 239, 195, 0.48) !important; }
     .reminder-badge { display: inline-flex; align-items: center; min-height: 25px; padding: 3px 7px; border: 1px solid rgba(229,83,56,.2); border-radius: 7px; color: var(--accent-dark); background: rgba(255,232,226,.72); font-size: 11px; font-weight: 700; }
+    .slot-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .amap-link { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 7px 10px; border: 1px solid rgba(25, 122, 104, 0.22); border-radius: 9px; color: #126454; background: rgba(219, 247, 237, 0.62); font-size: 12px; font-weight: 760; text-decoration: none; transition: transform 160ms ease, background 160ms ease; }
+    .amap-link:hover { background: rgba(194, 237, 225, 0.9); transform: translateY(-1px); }
+    .amap-link svg { width: 15px; height: 15px; }
 
     .dining { display: grid; gap: 9px; margin-top: 10px; }
     .dining-card { padding: 13px; }
@@ -458,7 +460,6 @@
     @media (min-width: 768px) {
       .hero { padding-top: 48px; }
       .section { padding: 42px 0; }
-      .day-list { gap: 24px; }
       .slot-photo { min-height: 135px; }
     }
 
@@ -473,7 +474,7 @@
       .section-heading p { margin-top: 7px; text-align: left; }
       .day-head { display: block; }
       .day-theme { margin-top: 5px; text-align: left; }
-      .map-shell, #map { min-height: 335px; }
+      .day-list { min-height: 0; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -490,7 +491,6 @@
       </a>
       <nav class="topbar-nav" aria-label="页面导航">
         <a href="#pretrip">行前</a>
-        <a href="#map-section">地图</a>
         <a href="#itinerary">日程</a>
         <a href="#tips">贴士</a>
       </nav>
@@ -551,23 +551,17 @@
       </div>
     </section>
 
-    <section class="section" id="map-section" aria-labelledby="map-heading">
-      <div class="wrap">
-        <div class="section-heading">
-          <h2 id="map-heading">路线地图</h2>
-          <p>点开标记可查看时间与系统导航入口；地图瓦片需联网，行程文字可离线阅读。</p>
-        </div>
-        <div class="glass-panel map-shell"><div id="map" aria-label="长沙行程地图"></div></div>
-      </div>
-    </section>
-
     <section class="section" id="itinerary" aria-labelledby="itinerary-heading">
       <div class="wrap">
         <div class="section-heading">
           <h2 id="itinerary-heading">逐日行程</h2>
-          <p>点击日期可快速跳转。遇到大雨或雷电，把户外项移到下一个晴朗早晚。</p>
+          <p>每次只看一天。点两侧箭头或在日程区域左右滑动切换；遇到大雨或雷电，把户外项移到下一个晴朗早晚。</p>
         </div>
-        <nav class="day-rail" id="day-nav" aria-label="快速跳转至某一天"></nav>
+        <div class="day-controller" aria-label="切换行程日期">
+          <button class="icon-button" id="previous-day" type="button" data-tooltip="前一天" aria-label="切换至前一天"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+          <div class="day-state" aria-live="polite"><strong id="day-label"></strong><span id="day-theme-label"></span><div class="day-dots" id="day-dots" aria-hidden="true"></div></div>
+          <button class="icon-button" id="next-day" type="button" data-tooltip="后一天" aria-label="切换至后一天"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+        </div>
         <div class="day-list" id="day-list"></div>
       </div>
     </section>
@@ -584,7 +578,7 @@
   </main>
 
   <footer class="footer wrap">
-    <p>长沙旅行计划 · 文字离线可读；地图与照片需要网络。图片来自 Wikimedia Commons，地图 © OpenStreetMap contributors。</p>
+    <p>长沙旅行计划 · 文字离线可读；高德导航和照片需要网络。图片来自 Wikimedia Commons。</p>
   </footer>
 
   <script id="trip-data" type="application/json">
@@ -643,8 +637,8 @@
       "theme": "抵达缓冲 · 老城夜色",
       "tips": ["当日以入住和短距离夜游为主；若抵达晚于 17:00，直接保留潮宗街与五一夜景即可。"],
       "slots": [
-        {"period": "noon", "name": "阳光城檀悦（中山路店）", "time": "14:00", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "办理入住后先补水、充电和避暑，不急着铺开行程。", "openingHours": "按订单办理入住", "ticketPrice": "已预订", "transport": {"mode": "步行 / 电动车", "fare": "—", "duration": "按抵达位置"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "潮宗街", "time": "17:30–19:00", "lat": 28.2065, "lng": 112.9681, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "从住处短骑进入老城街巷，作为长沙的低强度开场。", "openingHours": "街区全天开放", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "阳光城檀悦（中山路店）", "time": "14:00", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.5, "review": "办理入住后先补水、充电和避暑，不急着铺开行程。", "openingHours": "按订单办理入住", "ticketPrice": "已预订", "transport": {"mode": "步行 / 电动车", "fare": "—", "duration": "按抵达位置"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "潮宗街", "time": "17:30–19:00", "lat": 28.2065, "lng": 112.9681, "photo": null, "rating": 4.4, "review": "从住处短骑进入老城街巷，作为长沙的低强度开场。", "openingHours": "街区全天开放", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0},
         {"period": "evening", "name": "五一广场 / IFS", "time": "19:30–21:30", "lat": 28.2021, "lng": 112.9839, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "用商圈夜景和第一顿湘菜完成到达日，不追多个排队点。", "openingHours": "商圈按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
@@ -659,9 +653,9 @@
       "tips": ["湖南博物院周一闭馆，今天不排硬性核心景点；有雨就把户外湘江段完全取消。"],
       "alternatives": [{"label": "有雨方案", "summary": "IFS、商场、咖啡馆和就近湘菜；保持低强度。"}, {"label": "无雨方案", "summary": "17:30 后加湘江风光带散步，天黑前回到市中心。"}],
       "slots": [
-        {"period": "morning", "name": "酒店慢早餐 / 补给", "time": "09:30–11:00", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.2, "review": "第一天不早起，把睡眠、饮水和电量当成后续行程的余量。", "openingHours": "—", "ticketPrice": "—", "transport": {"mode": "步行", "fare": "—", "duration": "—"}, "needsBooking": false, "leadDays": 0},
+        {"period": "morning", "name": "酒店慢早餐 / 补给", "time": "09:30–11:00", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.2, "review": "第一天不早起，把睡眠、饮水和电量当成后续行程的余量。", "openingHours": "—", "ticketPrice": "—", "transport": {"mode": "步行", "fare": "—", "duration": "—"}, "needsBooking": false, "leadDays": 0},
         {"period": "noon", "name": "IFS / 五一商圈", "time": "12:00–16:30", "lat": 28.2016, "lng": 112.9817, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Changsha_IFS_2021.jpg/1920px-Changsha_IFS_2021.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "用空调环境承接雨天和高温，午后不安排骑行穿城。", "openingHours": "按商场公告", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "湘江风光带（天气允许）", "time": "17:30–19:00", "lat": 28.1998, "lng": 112.9706, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "雨停后再去江边，若雷雨未停就留在市中心用餐。", "openingHours": "全天开放", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 12 分钟"}, "needsBooking": false, "leadDays": 0}
+        {"period": "evening", "name": "湘江风光带（天气允许）", "time": "17:30–19:00", "lat": 28.1998, "lng": 112.9706, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Xiangjiang_River_4.jpg/1920px-Xiangjiang_River_4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "雨停后再去江边，若雷雨未停就留在市中心用餐。", "openingHours": "全天开放", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 12 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
         {"meal": "早餐", "place": "酒店附近粉店", "hours": "以门店当日为准", "dishes": [{"name": "肉丝米粉", "price": "约 ¥12–20"}, {"name": "糖油粑粑", "price": "约 ¥5–12"}]},
@@ -675,8 +669,8 @@
       "tips": ["博物院 16:00 停止入馆，优先预约 9:00–10:00 时段；参观后只去隔壁烈士公园，避免折返。"],
       "slots": [
         {"period": "morning", "name": "湖南博物院", "time": "09:00–12:00", "lat": 28.2143, "lng": 112.9864, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Entrance_of_Hunan_Museum%2C_2018-09-28.jpg/1920px-Entrance_of_Hunan_Museum%2C_2018-09-28.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.8, "review": "以马王堆汉墓陈列和湖南历史陈列为主，别把时间切得过碎。", "openingHours": "周二至周日 09:00–17:00，16:00 停止入馆", "closedDays": "周一闭馆，法定节假日以公告为准", "ticketPrice": "免费，需实名分时预约", "transport": {"mode": "电动车", "fare": "—", "duration": "约 12–18 分钟"}, "needsBooking": true, "leadDays": 3},
-        {"period": "noon", "name": "博物院周边午餐 / 回酒店避暑", "time": "12:10–16:30", "lat": 28.2129, "lng": 112.9876, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/New_building_of_Hunan_Museum_20230403a.jpg/1920px-New_building_of_Hunan_Museum_20230403a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.3, "review": "下午不在户外暴晒，回酒店补觉或在附近室内休息。", "openingHours": "—", "ticketPrice": "—", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "烈士公园", "time": "17:30–19:00", "lat": 28.2139, "lng": 112.9937, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Hunan_Provincial_Museum%2C_Changsha_%2810112446973%29.jpg/1920px-Hunan_Provincial_Museum%2C_Changsha_%2810112446973%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "从博物院向东接一段绿荫散步，遇雨则直接回市中心晚餐。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
+        {"period": "noon", "name": "博物院周边午餐 / 回酒店避暑", "time": "12:10–16:30", "lat": 28.2129, "lng": 112.9876, "photo": null, "rating": 4.3, "review": "下午不在户外暴晒，回酒店补觉或在附近室内休息。", "openingHours": "—", "ticketPrice": "—", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "烈士公园", "time": "17:30–19:00", "lat": 28.2139, "lng": 112.9937, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Hunan_Martyrs_Park_2023120417.jpg/1920px-Hunan_Martyrs_Park_2023120417.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "从博物院向东接一段绿荫散步，遇雨则直接回市中心晚餐。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
         {"meal": "午餐", "place": "博物院周边简餐", "hours": "以门店当日为准", "dishes": [{"name": "盖码粉", "price": "约 ¥15–28"}, {"name": "小炒肉套餐", "price": "约 ¥30–50"}]},
@@ -690,7 +684,7 @@
       "tips": ["橘子洲放到傍晚；岛上步行距离长，不带电动车进岛，直接地铁进出。"],
       "slots": [
         {"period": "morning", "name": "天心阁", "time": "08:30–10:00", "lat": 28.1894, "lng": 112.9880, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Attic_area_of_Tianxin_Pavilion%2C_Changsha.jpg/1920px-Attic_area_of_Tianxin_Pavilion%2C_Changsha.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "趁上午较凉时看古城墙与阁楼，具体开放、票务以前一天公告为准。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车", "fare": "—", "duration": "约 12–18 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "noon", "name": "长沙简牍博物馆", "time": "10:20–12:00", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Tianxin_Pavilion_in_Changsha_20250310.jpg/1920px-Tianxin_Pavilion_in_Changsha_20250310.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "从城墙转入室内，节奏更适合酷热与阵雨时段。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "长沙简牍博物馆", "time": "10:20–12:00", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Changsha_Jiandu_Museum.jpg/1920px-Changsha_Jiandu_Museum.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "从城墙转入室内，节奏更适合酷热与阵雨时段。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5 分钟"}, "needsBooking": false, "leadDays": 0},
         {"period": "evening", "name": "橘子洲", "time": "17:00–20:00", "lat": 28.1878, "lng": 112.9558, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Orange_Isle_2021122601.jpg/1920px-Orange_Isle_2021122601.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "把最晒的时间留在室内，傍晚再进岛看湘江两岸的光线变化。", "openingHours": "以景区当日公告为准", "ticketPrice": "免费，观光车另计且以现场为准", "transport": {"mode": "地铁 + 步行", "fare": "按实际线路", "duration": "约 30–45 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
@@ -705,8 +699,8 @@
       "tips": ["电动车只骑到岳麓山脚或大学城外围；书院与爱晚亭的步行段留足水和体力。"],
       "slots": [
         {"period": "morning", "name": "岳麓书院", "time": "08:30–10:30", "lat": 28.1839, "lng": 112.9351, "photo": "https://upload.wikimedia.org/wikipedia/commons/3/32/Yuelu-Academy-Gate.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "rating": 4.7, "review": "早到避开人流与闷热，重点感受书院建筑和院落秩序。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车到山脚 + 步行", "fare": "—", "duration": "约 25–35 分钟"}, "needsBooking": true, "leadDays": 2},
-        {"period": "noon", "name": "爱晚亭 / 湖南大学周边", "time": "10:40–14:30", "lat": 28.1841, "lng": 112.9320, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/%E5%B2%B3%E9%BA%93%E4%B9%A6%E9%99%A2%E6%95%99%E5%AD%A6%E6%96%8B_20251018.jpg/1920px-%E5%B2%B3%E9%BA%93%E4%B9%A6%E9%99%A2%E6%95%99%E5%AD%A6%E6%96%8B_20251018.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "短看爱晚亭后尽快下山午餐，不把盛夏正午留在登高路段。", "openingHours": "以景区当日公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 10–20 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "大学城 / 后湖片区", "time": "17:00–20:00", "lat": 28.1788, "lng": 112.9453, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "用大学城的晚餐收束西岸日，不再追一个跨城夜景。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0}
+        {"period": "noon", "name": "爱晚亭 / 湖南大学周边", "time": "10:40–14:30", "lat": 28.1841, "lng": 112.9320, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Autumn-Admiring_Pavilion_20230904A.jpg/1920px-Autumn-Admiring_Pavilion_20230904A.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "短看爱晚亭后尽快下山午餐，不把盛夏正午留在登高路段。", "openingHours": "以景区当日公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 10–20 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "大学城 / 后湖片区", "time": "17:00–20:00", "lat": 28.1788, "lng": 112.9453, "photo": null, "rating": 4.4, "review": "用大学城的晚餐收束西岸日，不再追一个跨城夜景。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
         {"meal": "午餐", "place": "湖南大学周边", "hours": "以门店当日为准", "dishes": [{"name": "盖码粉", "price": "约 ¥15–28"}, {"name": "长沙小炒", "price": "约 ¥35–65"}]},
@@ -719,9 +713,9 @@
       "theme": "江阁旧城 · 南门口",
       "tips": ["今天的点位集中在老城南段；中午进入简牍博物馆或回酒店，不在城墙与江边硬晒。"],
       "slots": [
-        {"period": "morning", "name": "杜甫江阁", "time": "09:00–10:30", "lat": 28.1906, "lng": 112.9754, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Xiangjiang_River_4.jpg/1920px-Xiangjiang_River_4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "早上看湘江与阁楼外观，逆光少、体感也比正午舒适。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "noon", "name": "长沙简牍博物馆（雨天优先）", "time": "10:50–12:30", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Tianxin_Pavilion_in_Changsha_20250310.jpg/1920px-Tianxin_Pavilion_in_Changsha_20250310.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "若 26 日已完整参观，可把这段换成回酒店休息或一家甜品店。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 8 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "南门口 / 坡子街", "time": "17:30–20:30", "lat": 28.1844, "lng": 112.9805, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "晚上只选一条街慢吃，避免在高峰把时间耗在跨城排队上。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
+        {"period": "morning", "name": "杜甫江阁", "time": "09:00–10:30", "lat": 28.1906, "lng": 112.9754, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Du_Fu_Jiang_Ge_%28Riverside_Pavilion_of_Du_Fu%29%2C_2010092701.jpg/1920px-Du_Fu_Jiang_Ge_%28Riverside_Pavilion_of_Du_Fu%29%2C_2010092701.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "早上看湘江与阁楼外观，逆光少、体感也比正午舒适。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "长沙简牍博物馆（雨天优先）", "time": "10:50–12:30", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bamboo_slips_and_wooden_tablets_for_Taxes_and_Levies%2C_Changsha_Jiandu_Museum%2C_picture1.jpg/1920px-Bamboo_slips_and_wooden_tablets_for_Taxes_and_Levies%2C_Changsha_Jiandu_Museum%2C_picture1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "若 26 日已完整参观，可把这段换成回酒店休息或一家甜品店。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 8 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "南门口 / 坡子街", "time": "17:30–20:30", "lat": 28.1844, "lng": 112.9805, "photo": null, "rating": 4.5, "review": "晚上只选一条街慢吃，避免在高峰把时间耗在跨城排队上。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
         {"meal": "午餐", "place": "南门口附近", "hours": "以门店当日为准", "dishes": [{"name": "猪油拌粉", "price": "约 ¥12–20"}, {"name": "凉菜", "price": "约 ¥10–25"}]},
@@ -735,8 +729,8 @@
       "tips": ["往返距离远于前几日。只有电量至少 60%、天气稳定且愿意骑约 20 km 时才骑电动车；否则全程地铁/打车。"],
       "alternatives": [{"label": "电量与天气都好", "summary": "清晨骑去洋湖，午后入美术馆，傍晚再回。"}, {"label": "下雨或不想远骑", "summary": "用长沙博物馆与市中心商场替换，不影响主线完成度。"}],
       "slots": [
-        {"period": "morning", "name": "洋湖湿地", "time": "08:30–10:00", "lat": 28.1190, "lng": 112.9374, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Xie_Zilong_Photography_Museum_2023040102.jpg/1920px-Xie_Zilong_Photography_Museum_2023040102.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "早到看水岸与绿地，气温升高前离开户外。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "电动车或地铁", "fare": "按实际线路", "duration": "电动车约 35–45 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "noon", "name": "李自健美术馆", "time": "10:20–13:00", "lat": 28.1157, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Xie_Zilong_Photography_Museum_2023040102.jpg/1920px-Xie_Zilong_Photography_Museum_2023040102.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "把正午交给室内展览，临展与开放日以馆方公告为准。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "morning", "name": "洋湖湿地", "time": "08:30–10:00", "lat": 28.1190, "lng": 112.9374, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Egret_Tower_in_Yanghu_Wetland_Park_2023040107.jpg/1920px-Egret_Tower_in_Yanghu_Wetland_Park_2023040107.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "早到看水岸与绿地，气温升高前离开户外。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "电动车或地铁", "fare": "按实际线路", "duration": "电动车约 35–45 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "李自健美术馆", "time": "10:20–13:00", "lat": 28.1157, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Li_Zijian_Art_Museum_2023040104.jpg/1920px-Li_Zijian_Art_Museum_2023040104.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "把正午交给室内展览，临展与开放日以馆方公告为准。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0},
         {"period": "evening", "name": "谢子龙影像艺术馆", "time": "14:00–16:30", "lat": 28.1213, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Xie_Zilong_Photography_Museum_2023040108.jpg/1920px-Xie_Zilong_Photography_Museum_2023040108.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "视闭馆时间决定是否完整停留；离馆后直接返程，避免夜骑远距离。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行后返程", "fare": "按实际线路", "duration": "—"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
@@ -750,9 +744,9 @@
       "theme": "退房返程 · 不赶景点",
       "tips": ["12:00 前退房。未提供返程时间，因此不预设景点；把行李、充电器与雨具列为最后检查项。"],
       "slots": [
-        {"period": "morning", "name": "酒店退房", "time": "08:30–12:00", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.2, "review": "慢早餐、收拾行李，留足退房与前往车站/机场的缓冲。", "openingHours": "12:00 前退房", "ticketPrice": "已预订", "transport": {"mode": "按返程交通", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0},
-        {"period": "noon", "name": "中山路附近收尾午餐", "time": "12:00–13:00", "lat": 28.2065, "lng": 112.9681, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.2, "review": "只有返程在下午时再安排；早班返程则直接跳过。", "openingHours": "以门店当日为准", "ticketPrice": "按实际消费", "transport": {"mode": "步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "返程（待补交通）", "time": "按订单", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.0, "review": "交通信息补齐后，可把这里替换为准确的出发时间与接驳。", "openingHours": "—", "ticketPrice": "待补", "transport": {"mode": "待补", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0}
+        {"period": "morning", "name": "酒店退房", "time": "08:30–12:00", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.2, "review": "慢早餐、收拾行李，留足退房与前往车站/机场的缓冲。", "openingHours": "12:00 前退房", "ticketPrice": "已预订", "transport": {"mode": "按返程交通", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "中山路附近收尾午餐", "time": "12:00–13:00", "lat": 28.2065, "lng": 112.9681, "photo": null, "rating": 4.2, "review": "只有返程在下午时再安排；早班返程则直接跳过。", "openingHours": "以门店当日为准", "ticketPrice": "按实际消费", "transport": {"mode": "步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "返程（待补交通）", "time": "按订单", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.0, "review": "交通信息补齐后，可把这里替换为准确的出发时间与接驳。", "openingHours": "—", "ticketPrice": "待补", "transport": {"mode": "待补", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
         {"meal": "早餐", "place": "酒店附近粉店", "hours": "以门店当日为准", "dishes": [{"name": "牛肉粉", "price": "约 ¥15–25"}, {"name": "豆浆", "price": "约 ¥4–10"}]}
@@ -863,7 +857,6 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
   </script>
 
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     (function () {
       var trip = JSON.parse(document.getElementById('trip-data').textContent);
@@ -872,8 +865,14 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
       var storageKey = 'changsha-trip-checklist-2026';
 
       function photoHTML(slot) {
-        var image = slot.photo ? '<img src="' + escapeHTML(slot.photo) + '" alt="' + escapeHTML(slot.name) + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'is-fallback\')">' : '';
+        if (!slot.photo) return '';
+        var image = '<img src="' + escapeHTML(slot.photo) + '" alt="' + escapeHTML(slot.name) + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'is-fallback\')">';
         return '<div class="slot-photo">' + image + '<span class="photo-label">' + escapeHTML(slot.name) + '</span></div>';
+      }
+
+      function amapLink(slot) {
+        return 'https://uri.amap.com/navigation?to=' + encodeURIComponent(slot.lng + ',' + slot.lat + ',' + slot.name)
+          + '&mode=car&coordinate=wgs84&callnative=1';
       }
 
       function metaHTML(slot) {
@@ -928,12 +927,20 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
       }
 
       function renderDays() {
-        var dayNav = document.getElementById('day-nav');
         var dayList = document.getElementById('day-list');
-        dayNav.innerHTML = trip.days.map(function (day, index) {
-          return '<button class="day-jump' + (index === 0 ? ' is-active' : '') + '" type="button" data-day-target="day-' + index + '" aria-label="跳转至第 ' + (index + 1) + ' 天">D' + (index + 1) + '</button>';
-        }).join('');
-        dayList.innerHTML = trip.days.map(function (day, index) {
+        var previousButton = document.getElementById('previous-day');
+        var nextButton = document.getElementById('next-day');
+        var label = document.getElementById('day-label');
+        var themeLabel = document.getElementById('day-theme-label');
+        var dots = document.getElementById('day-dots');
+        var start = trip.days[0].date;
+        var end = trip.days[trip.days.length - 1].date;
+        var today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' });
+        var activeIndex = today <= start ? 0 : today >= end ? trip.days.length - 1 : trip.days.findIndex(function (day) { return day.date === today; });
+        if (activeIndex < 0) activeIndex = 0;
+
+        function renderActiveDay() {
+          var day = trip.days[activeIndex];
           var tips = (day.tips || []).map(function (tip) { return '<p class="day-tip">' + icon('cloud-rain') + '<span>' + escapeHTML(tip) + '</span></p>'; }).join('');
           var slots = day.slots.map(function (slot) {
             return '<article class="glass-panel slot"><div class="slot-period">' + periodLabel[slot.period] + '</div><div class="slot-main">'
@@ -942,6 +949,7 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
               + '<p class="slot-review">' + escapeHTML(slot.review) + '</p>'
               + metaHTML(slot)
               + (slot.needsBooking ? '<div style="margin-top:8px">' + reminderBadgeHTML(slot.leadDays) + '</div>' : '')
+              + '<div class="slot-actions"><a class="amap-link" href="' + amapLink(slot) + '" target="_blank" rel="noopener noreferrer" aria-label="在高德地图中导航至 ' + escapeHTML(slot.name) + '">' + icon('navigation') + '<span>高德导航</span></a></div>'
               + '</div></article>';
           }).join('');
           var dining = (day.dining || []).map(function (meal) {
@@ -949,15 +957,33 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
               + meal.dishes.map(function (dish) { return '<span class="dish">' + escapeHTML(dish.name) + '<b>' + escapeHTML(dish.price) + '</b></span>'; }).join('') + '</div></article>';
           }).join('');
           var alternatives = (day.alternatives || []).map(function (alt) { return '<div class="alternative"><strong>' + escapeHTML(alt.label) + '</strong><span>' + escapeHTML(alt.summary) + '</span></div>'; }).join('');
-          return '<article class="day-block" id="day-' + index + '"><div class="day-head"><div class="day-date"><span class="day-index">DAY ' + String(index + 1).padStart(2, '0') + '</span><h3>' + escapeHTML(day.date.slice(5).replace('-', ' 月 ')) + ' 日 · ' + escapeHTML(day.weekday) + '</h3></div><p class="day-theme">' + escapeHTML(day.theme) + '</p></div>' + tips + '<div class="slots">' + slots + '</div>' + (alternatives ? '<div class="alternatives">' + alternatives + '</div>' : '') + '<div class="dining">' + dining + '</div></article>';
-        }).join('');
-        dayNav.querySelectorAll('.day-jump').forEach(function (button) {
-          button.addEventListener('click', function () {
-            document.getElementById(button.dataset.dayTarget).scrollIntoView({ behavior: 'smooth', block: 'start' });
-            dayNav.querySelectorAll('.day-jump').forEach(function (item) { item.classList.remove('is-active'); });
-            button.classList.add('is-active');
-          });
-        });
+          dayList.innerHTML = '<article class="day-block" id="active-day"><div class="day-head"><div class="day-date"><span class="day-index">DAY ' + String(activeIndex + 1).padStart(2, '0') + '</span><h3>' + escapeHTML(day.date.slice(5).replace('-', ' 月 ')) + ' 日 · ' + escapeHTML(day.weekday) + '</h3></div><p class="day-theme">' + escapeHTML(day.theme) + '</p></div>' + tips + '<div class="slots">' + slots + '</div>' + (alternatives ? '<div class="alternatives">' + alternatives + '</div>' : '') + '<div class="dining">' + dining + '</div></article>';
+          label.textContent = day.date.slice(5).replace('-', ' 月 ') + ' 日 · ' + day.weekday;
+          themeLabel.textContent = day.theme + ' · 第 ' + (activeIndex + 1) + ' / ' + trip.days.length + ' 天';
+          dots.innerHTML = trip.days.map(function (_, index) { return '<span class="day-dot' + (index === activeIndex ? ' is-active' : '') + '"></span>'; }).join('');
+          previousButton.disabled = activeIndex === 0;
+          nextButton.disabled = activeIndex === trip.days.length - 1;
+          if (window.lucide) window.lucide.createIcons();
+        }
+
+        function moveDay(delta) {
+          var nextIndex = activeIndex + delta;
+          if (nextIndex < 0 || nextIndex >= trip.days.length) return;
+          activeIndex = nextIndex;
+          renderActiveDay();
+          document.getElementById('itinerary').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        previousButton.addEventListener('click', function () { moveDay(-1); });
+        nextButton.addEventListener('click', function () { moveDay(1); });
+        var touchStartX = 0;
+        dayList.addEventListener('touchstart', function (event) { touchStartX = event.changedTouches[0].clientX; }, { passive: true });
+        dayList.addEventListener('touchend', function (event) {
+          var distance = event.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(distance) < 48) return;
+          moveDay(distance < 0 ? 1 : -1);
+        }, { passive: true });
+        renderActiveDay();
       }
 
       function renderTips() {
@@ -966,24 +992,11 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
         }).join('');
       }
 
-      function renderMap() {
-        var points = trip.days.reduce(function (all, day) {
-          return all.concat(day.slots.map(function (slot) { return { lat: slot.lat, lng: slot.lng, name: slot.name, time: day.date + ' ' + slot.time }; }));
-        }, []);
-        var mapElement = document.getElementById('map');
-        if (!window.L) {
-          mapElement.innerHTML = '<div class="map-fallback">地图服务暂时不可用。行程文字和待办仍可离线阅读。</div>';
-          return;
-        }
-        initTravelMap('map', points);
-      }
-
       renderChecklist();
       renderPreTrip();
       renderStay();
       renderDays();
       renderTips();
-      renderMap();
       window.addEventListener('load', function () { if (window.lucide) window.lucide.createIcons(); });
     }());
   </script>
