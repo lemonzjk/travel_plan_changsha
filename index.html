@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f5f2">
+  <meta name="description" content="2026 年 8 月长沙 8 天 7 晚旅行计划，含电动车路线、预约提醒、地图与逐日安排。">
+  <title>长沙 · 湘江慢游</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://upload.wikimedia.org">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQn0M6yOGz8CkPzBz8cYQ7KQ2p3pqtM=" crossorigin="">
+  <style>
+    :root {
+      --ink: #17211d;
+      --muted: #64736d;
+      --soft: #8a9991;
+      --page: #edf2ee;
+      --page-deep: #d9e5dc;
+      --glass: rgba(255, 255, 255, 0.58);
+      --glass-strong: rgba(255, 255, 255, 0.76);
+      --line: rgba(36, 67, 54, 0.13);
+      --accent: #e55338;
+      --accent-dark: #ac2c20;
+      --mint: #197a68;
+      --sky: #65b8c5;
+      --gold: #d99831;
+      --radius: 18px;
+      --shadow: 0 18px 45px rgba(36, 67, 54, 0.11);
+      --content: 960px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(116deg, rgba(101, 184, 197, 0.16), transparent 32%),
+        linear-gradient(300deg, rgba(229, 83, 56, 0.12), transparent 31%),
+        var(--page);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background: linear-gradient(108deg, transparent 38%, rgba(255, 255, 255, 0.38) 50%, transparent 62%);
+      background-size: 220% 100%;
+      animation: sheen-shift 16s linear infinite;
+    }
+
+    button, input { font: inherit; }
+
+    button { cursor: pointer; }
+
+    a { color: inherit; }
+
+    .site-header {
+      position: sticky;
+      z-index: 30;
+      top: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+      background: rgba(237, 242, 238, 0.68);
+      -webkit-backdrop-filter: blur(22px) saturate(142%);
+      backdrop-filter: blur(22px) saturate(142%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: min(var(--content), calc(100% - 32px));
+      min-height: 60px;
+      margin: 0 auto;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 760;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      border-radius: 9px;
+      color: white;
+      background: linear-gradient(145deg, var(--accent), #ee8e51);
+      box-shadow: 0 7px 16px rgba(229, 83, 56, 0.22);
+    }
+
+    .brand-mark svg { width: 16px; height: 16px; }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      overflow-x: auto;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+
+    .topbar-nav::-webkit-scrollbar { display: none; }
+    .topbar-nav a { text-decoration: none; }
+    .topbar-nav a:hover { color: var(--accent-dark); }
+
+    main { padding-bottom: 72px; }
+
+    .wrap { width: min(var(--content), calc(100% - 32px)); margin: 0 auto; }
+
+    .hero { padding: 36px 0 24px; }
+
+    .hero-shell {
+      position: relative;
+      overflow: hidden;
+      min-height: 410px;
+      padding: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      border-radius: 24px;
+      color: #fff;
+      background: #16473f;
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .hero-shell::before {
+      position: absolute;
+      z-index: -2;
+      inset: 0;
+      content: "";
+      background:
+        linear-gradient(90deg, rgba(10, 39, 34, 0.91) 0%, rgba(10, 39, 34, 0.68) 46%, rgba(10, 39, 34, 0.2) 100%),
+        url("https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail") center / cover;
+    }
+
+    .hero-shell::after {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      opacity: 0.74;
+      background: linear-gradient(120deg, transparent 22%, rgba(172, 232, 215, 0.23) 45%, transparent 68%);
+      background-size: 210% 100%;
+      animation: sheen-shift 13s linear infinite reverse;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 7px;
+      height: 7px;
+      content: "";
+      border-radius: 50%;
+      background: #94e2d3;
+      box-shadow: 0 0 16px rgba(148, 226, 211, 0.9);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 620px;
+      margin-bottom: 12px;
+      font-size: clamp(40px, 7vw, 68px);
+      font-weight: 760;
+      letter-spacing: 0;
+      line-height: 1.03;
+    }
+
+    .hero-copy {
+      max-width: 510px;
+      margin-bottom: 24px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 15px;
+    }
+
+    .hero-data {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 510px;
+      gap: 9px;
+    }
+
+    .hero-stat {
+      padding: 12px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.13);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-stat span { display: block; color: rgba(255, 255, 255, 0.64); font-size: 11px; }
+    .hero-stat strong { display: block; margin-top: 2px; font-size: 14px; line-height: 1.25; }
+
+    .section { padding: 31px 0; scroll-margin-top: 70px; }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .section-heading h2 { margin: 0; font-size: 24px; letter-spacing: 0; line-height: 1.18; }
+    .section-heading p { max-width: 470px; margin: 0; color: var(--muted); font-size: 13px; text-align: right; }
+
+    .glass-panel {
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius);
+      background: var(--glass);
+      box-shadow: 0 10px 30px rgba(43, 71, 57, 0.06);
+      -webkit-backdrop-filter: blur(22px) saturate(138%);
+      backdrop-filter: blur(22px) saturate(138%);
+    }
+
+    .todo-panel { padding: 18px; }
+
+    .pretrip-todo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      min-width: 0;
+      padding: 10px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.4);
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .todo-item input { width: 17px; height: 17px; flex: 0 0 auto; margin: 1px 0 0; accent-color: var(--mint); }
+    .todo-item.is-done { opacity: 0.52; text-decoration: line-through; }
+    .todo-deadline { flex: 0 0 auto; color: var(--accent-dark); font-weight: 750; }
+    .todo-text { min-width: 0; }
+
+    .info-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+    .info-item { padding: 17px; }
+    .info-item h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 15px; }
+    .info-item h3 svg { width: 17px; height: 17px; color: var(--mint); }
+    .info-item p { margin: 0; color: var(--muted); font-size: 13px; }
+    .app-list { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+    .app-list li { padding: 5px 8px; border: 1px solid var(--line); border-radius: 7px; background: rgba(255, 255, 255, 0.42); color: var(--muted); font-size: 12px; }
+
+    .travel-grid { display: grid; gap: 12px; }
+
+    .travel-card { padding: 18px; }
+    .travel-card h3 { margin-bottom: 7px; font-size: 16px; }
+    .travel-card p { margin-bottom: 0; color: var(--muted); font-size: 13px; }
+    .booked-line { display: flex; gap: 9px; align-items: flex-start; padding: 12px; border-radius: 11px; background: rgba(25, 122, 104, 0.1); }
+    .status-badge { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 22px; padding: 3px 7px; border: 1px solid rgba(25, 122, 104, 0.24); border-radius: 7px; color: #126454; background: rgba(219, 247, 237, 0.72); font-size: 11px; font-weight: 750; }
+    .booked-line strong { display: block; font-size: 14px; }
+    .booked-line span:last-child { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .empty-state { color: var(--muted); font-size: 13px; }
+
+    .disclaimer {
+      display: flex;
+      gap: 11px;
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px solid rgba(217, 152, 49, 0.25);
+      border-radius: 12px;
+      color: #6c5123;
+      background: rgba(255, 248, 228, 0.64);
+      font-size: 12px;
+    }
+
+    .disclaimer svg { width: 18px; height: 18px; flex: 0 0 auto; color: var(--gold); }
+    .disclaimer p { margin: 0; }
+
+    .map-shell { overflow: hidden; min-height: 395px; padding: 0; }
+    #map { width: 100%; min-height: 395px; background: linear-gradient(145deg, #e4eee7, #cce1dc); }
+    .route-pin { display: grid; place-items: center; border: 2px solid white; border-radius: 50%; color: white; background: var(--accent); box-shadow: 0 4px 12px rgba(172, 44, 32, 0.34); }
+    .route-pin__num { font-size: 12px; font-weight: 750; }
+    .leaflet-popup-content { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; font-size: 13px; }
+    .leaflet-popup-content a { color: var(--accent-dark); font-weight: 700; }
+    .map-fallback { display: grid; min-height: 395px; place-items: center; padding: 24px; color: var(--muted); text-align: center; }
+
+    .day-rail {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .day-rail::-webkit-scrollbar { display: none; }
+    .day-jump {
+      display: inline-grid;
+      min-width: 43px;
+      height: 37px;
+      place-items: center;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.42);
+      font-size: 12px;
+      font-weight: 700;
+      transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .day-jump:hover, .day-jump.is-active { color: white; border-color: var(--accent); background: var(--accent); transform: translateY(-1px); }
+
+    .day-list { display: grid; gap: 18px; }
+
+    .day-block {
+      position: relative;
+      padding-top: 4px;
+      scroll-margin-top: 85px;
+    }
+
+    .day-block + .day-block { padding-top: 24px; border-top: 1px solid var(--line); }
+
+    .day-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 13px;
+    }
+
+    .day-date { display: flex; align-items: baseline; gap: 9px; }
+    .day-index { color: var(--accent); font-size: 13px; font-weight: 800; }
+    .day-date h3 { margin: 0; font-size: 21px; letter-spacing: 0; line-height: 1.15; }
+    .day-theme { margin: 0; color: var(--muted); font-size: 13px; text-align: right; }
+
+    .day-tip {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-left: 2px solid var(--sky);
+      color: #406e75;
+      background: rgba(101, 184, 197, 0.09);
+      font-size: 12px;
+    }
+
+    .day-tip svg { width: 16px; height: 16px; flex: 0 0 auto; }
+
+    .slots { display: grid; gap: 10px; }
+
+    .slot {
+      display: grid;
+      grid-template-columns: 47px minmax(0, 1fr);
+      gap: 11px;
+      padding: 12px;
+    }
+
+    .slot-period { padding-top: 2px; color: var(--accent-dark); font-size: 12px; font-weight: 800; }
+    .slot-main { min-width: 0; }
+    .slot-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .slot-title h4 { margin: 0; font-size: 16px; line-height: 1.3; }
+    .slot-time { flex: 0 0 auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .slot-review { margin: 5px 0 9px; color: var(--muted); font-size: 13px; }
+
+    .slot-photo {
+      position: relative;
+      overflow: hidden;
+      min-height: 146px;
+      margin: 0 0 10px;
+      border-radius: 11px;
+      background:
+        linear-gradient(135deg, rgba(25, 122, 104, 0.74), rgba(101, 184, 197, 0.68)),
+        #bed7ce;
+    }
+
+    .slot-photo img {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .slot-photo::after { position: absolute; inset: 0; content: ""; pointer-events: none; background: linear-gradient(180deg, transparent 45%, rgba(13, 45, 39, 0.45)); }
+    .photo-label { position: absolute; z-index: 1; bottom: 9px; left: 10px; color: white; font-size: 11px; font-weight: 720; text-shadow: 0 1px 4px rgba(0,0,0,.36); }
+    .slot-photo.is-fallback .photo-label { z-index: 2; }
+
+    .meta-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .meta-list li { display: inline-flex; align-items: center; gap: 5px; min-height: 25px; padding: 3px 7px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: rgba(255,255,255,.4); font-size: 11px; }
+    .meta-list svg { width: 13px; height: 13px; color: var(--mint); }
+    .rating { color: #875512 !important; background: rgba(255, 239, 195, 0.48) !important; }
+    .reminder-badge { display: inline-flex; align-items: center; min-height: 25px; padding: 3px 7px; border: 1px solid rgba(229,83,56,.2); border-radius: 7px; color: var(--accent-dark); background: rgba(255,232,226,.72); font-size: 11px; font-weight: 700; }
+
+    .dining { display: grid; gap: 9px; margin-top: 10px; }
+    .dining-card { padding: 13px; }
+    .dining-top { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+    .dining-top strong { font-size: 14px; }
+    .dining-top span { color: var(--muted); font-size: 11px; text-align: right; }
+    .dishes { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dish { display: inline-flex; gap: 5px; padding: 4px 7px; border-radius: 7px; color: #5b4a32; background: rgba(232, 194, 121, 0.18); font-size: 11px; }
+    .dish b { color: var(--accent-dark); font-weight: 700; }
+
+    .alternatives { display: grid; gap: 8px; margin-top: 10px; }
+    .alternative { padding: 12px; border: 1px dashed rgba(25, 122, 104, 0.3); border-radius: 11px; background: rgba(219, 247, 237, 0.34); }
+    .alternative strong { display: block; margin-bottom: 3px; color: #126454; font-size: 12px; }
+    .alternative span { color: var(--muted); font-size: 12px; }
+
+    .tips-list { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 0; margin: 0; list-style: none; }
+    .tips-list li { display: flex; gap: 10px; padding: 14px; color: var(--muted); font-size: 13px; }
+    .tips-list svg { width: 18px; height: 18px; flex: 0 0 auto; color: var(--accent); }
+
+    .footer { padding: 10px 0 25px; color: var(--soft); font-size: 11px; text-align: center; }
+    .footer a { color: inherit; }
+
+    @keyframes sheen-shift { from { background-position: 160% 0; } to { background-position: -80% 0; } }
+
+    @media (min-width: 680px) {
+      .hero-shell { min-height: 426px; padding: 38px; }
+      .hero-data { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .travel-grid { grid-template-columns: 1.05fr .95fr; }
+      .slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .slot { grid-template-columns: 1fr; }
+      .slot-period { padding: 0; }
+      .dining { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tips-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 768px) {
+      .hero { padding-top: 48px; }
+      .section { padding: 42px 0; }
+      .day-list { gap: 24px; }
+      .slot-photo { min-height: 135px; }
+    }
+
+    @media (max-width: 500px) {
+      .topbar { width: min(100% - 24px, var(--content)); }
+      .wrap { width: min(100% - 24px, var(--content)); }
+      .topbar-nav { display: none; }
+      .hero-shell { min-height: 405px; padding: 24px; border-radius: 18px; }
+      h1 { font-size: 43px; }
+      .hero-data { grid-template-columns: 1fr 1fr; }
+      .section-heading { display: block; }
+      .section-heading p { margin-top: 7px; text-align: left; }
+      .day-head { display: block; }
+      .day-theme { margin-top: 5px; text-align: left; }
+      .map-shell, #map { min-height: 335px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="brand" href="#top" aria-label="回到行程首页">
+        <span class="brand-mark" data-lucide="map-pinned" aria-hidden="true"></span>
+        <span>长沙 · 湘江慢游</span>
+      </a>
+      <nav class="topbar-nav" aria-label="页面导航">
+        <a href="#pretrip">行前</a>
+        <a href="#map-section">地图</a>
+        <a href="#itinerary">日程</a>
+        <a href="#tips">贴士</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-shell">
+          <p class="eyebrow">2026.08.23 - 08.30</p>
+          <h1>长沙 · 湘江慢游</h1>
+          <p class="hero-copy">住在开福区中山路附近，按两轮电动车做短途连接；把高温与阵雨留给室内，把湘江、书院和夜色留给早晚。</p>
+          <div class="hero-data" aria-label="行程概览">
+            <div class="hero-stat"><span>入住</span><strong>8/23 · 14:00</strong></div>
+            <div class="hero-stat"><span>离店</span><strong>8/30 · 12:00</strong></div>
+            <div class="hero-stat"><span>住宿</span><strong>开福区 · 中山路</strong></div>
+            <div class="hero-stat"><span>出行</span><strong>两轮电动车为主</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="checklist-heading">
+      <div class="wrap">
+        <div class="section-heading">
+          <h2 id="checklist-heading">出发前待办</h2>
+          <p>勾选状态保存在当前设备；参观、票务和天气均以出行前官方信息为准。</p>
+        </div>
+        <div class="glass-panel todo-panel" id="checklist"></div>
+      </div>
+    </section>
+
+    <section class="section" id="pretrip" aria-labelledby="pretrip-heading">
+      <div class="wrap">
+        <div class="section-heading">
+          <h2 id="pretrip-heading">8 月出行备忘</h2>
+          <p>高温、强日照与午后阵雨是此次排程的主要变量。</p>
+        </div>
+        <div class="info-grid" id="pretrip-grid"></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="stay-heading">
+      <div class="wrap">
+        <div class="section-heading">
+          <h2 id="stay-heading">抵离与住宿</h2>
+          <p>酒店已确认；抵达与返程交通尚未提供，因此不虚构航班或车次。</p>
+        </div>
+        <div class="travel-grid">
+          <article class="glass-panel travel-card" id="flight-card"></article>
+          <article class="glass-panel travel-card" id="hotel-card"></article>
+        </div>
+        <aside class="disclaimer" id="disclaimer" aria-label="信息免责声明">
+          <i data-lucide="circle-alert" aria-hidden="true"></i>
+          <p>本页全部信息（天气、餐厅、景点、门票、价格、营业时间、评分、交通与活动等）均为基于公开资料整理的参考建议，可能不准确或已过时，不保证与实时情况一致；请在官方渠道、订票订房和地图 App 核实后再做决定或前往。</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="map-section" aria-labelledby="map-heading">
+      <div class="wrap">
+        <div class="section-heading">
+          <h2 id="map-heading">路线地图</h2>
+          <p>点开标记可查看时间与系统导航入口；地图瓦片需联网，行程文字可离线阅读。</p>
+        </div>
+        <div class="glass-panel map-shell"><div id="map" aria-label="长沙行程地图"></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="itinerary" aria-labelledby="itinerary-heading">
+      <div class="wrap">
+        <div class="section-heading">
+          <h2 id="itinerary-heading">逐日行程</h2>
+          <p>点击日期可快速跳转。遇到大雨或雷电，把户外项移到下一个晴朗早晚。</p>
+        </div>
+        <nav class="day-rail" id="day-nav" aria-label="快速跳转至某一天"></nav>
+        <div class="day-list" id="day-list"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tips" aria-labelledby="tips-heading">
+      <div class="wrap">
+        <div class="section-heading">
+          <h2 id="tips-heading">全程实用贴士</h2>
+          <p>不把行程排满，留出天气、排队与电量的余量。</p>
+        </div>
+        <ul class="tips-list" id="tips-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <p>长沙旅行计划 · 文字离线可读；地图与照片需要网络。图片来自 Wikimedia Commons，地图 © OpenStreetMap contributors。</p>
+  </footer>
+
+  <script id="trip-data" type="application/json">
+{
+  "title": "长沙 · 湘江慢游",
+  "startDate": "2026-08-23",
+  "colorScheme": "湘江雾绿 · 辣椒红 · 晴空蓝",
+  "preTrip": {
+    "weather": {
+      "summary": "8 月长沙闷热潮湿，日间常超过 30°C；当前短期预报对 8/23–8/25 显示有雨，户外项目放在清晨或 17:00 后。",
+      "typhoon": "雷雨时停止骑行并远离江边、树下和高处；出发前 48 小时再次查看长沙气象预警与小时预报。"
+    },
+    "packing": "速干短袖、防晒衣、遮阳帽、晴雨两用伞、防滑凉鞋；博物馆和商场空调强，随身放一件薄外套。",
+    "payment": "微信/支付宝覆盖日常消费；备少量现金以防小店网络异常。电动车带充电器，停车以物业和景区现场规则为准。",
+    "apps": ["高德地图（实时导航与停车）", "湖南博物院（预约）", "天气（小时降雨）", "长沙地铁（跨江备选）"],
+    "ticketTip": "湖南博物院免费但需实名分时预约；官方说明为提前 5 天、每天 20:00 放出最新一日票。岳麓书院等景点也请在出发前一天确认票务与开放。"
+  },
+  "flights": {
+    "booked": [],
+    "candidates": [],
+    "note": "尚未提供抵达长沙和离开长沙的交通信息，页面保留此处，后续可直接补入班次或车次。"
+  },
+  "hotelAreas": [
+    {
+      "area": "已订 · 开福区中山路",
+      "reason": "靠近潮宗街、湘江北段与五一商圈，首尾日和市中心短途骑行都方便。",
+      "options": [
+        {
+          "tier": "已确认",
+          "name": "阳光城檀悦（中山路店）2 栋",
+          "priceRange": "8/23 14:00 入住 · 8/30 12:00 离开",
+          "note": "全程不换酒店；每天中午回酒店避暑、补水与充电。"
+        }
+      ]
+    }
+  ],
+  "disclaimer": "本页全部信息（天气、餐厅、景点、门票、价格、营业时间、评分、交通与活动等）均为基于公开资料整理的参考建议，可能不准确或已过时，不保证与实时情况一致；请在官方渠道、订票订房和地图 App 核实后再做决定或前往。",
+  "tips": [
+    "两轮电动车优先服务 2–8 km 的市内连接；跨江、暴雨、夜间强降雨和单程超过约 10 km 的行程，切换地铁或打车更稳。",
+    "不把电动车骑进橘子洲和岳麓山景区。到景区外围按现场规则停车，徒步进入；岳麓山登高不安排在正午。",
+    "湖南博物院安排在周二，因为官方说明周一闭馆。8/25 的票按当前规则应在 8/20 20:00 起关注预约。",
+    "热门湘菜馆尽量避开 12:00–13:00、18:00–20:00；米粉可作为早餐或晚间补给，口味虾与正餐安排在非高峰取号。",
+    "雨天把江边、橘子洲和山路延期，优先博物院、简牍博物馆、商场或美术馆；雷电时不在江边和树下停留。",
+    "每日出发前看电量、刹车、胎压和雨具；不要因导航绕路进入机动车快速路或禁行区域。"
+  ],
+  "reminders": [
+    {"item": "关注湖南博物院 8/25 实名分时票（每天 20:00 放最新一日）", "leadDays": 3},
+    {"item": "核实岳麓书院、天心阁、简牍博物馆的开放与票务", "leadDays": 2},
+    {"item": "查看小时天气，准备雨具、防晒与一件薄外套", "leadDays": 2},
+    {"item": "电动车满电、检查刹车胎压、确认停车点", "leadDays": 1}
+  ],
+  "days": [
+    {
+      "date": "2026-08-23",
+      "weekday": "周日",
+      "theme": "抵达缓冲 · 老城夜色",
+      "tips": ["当日以入住和短距离夜游为主；若抵达晚于 17:00，直接保留潮宗街与五一夜景即可。"],
+      "slots": [
+        {"period": "noon", "name": "阳光城檀悦（中山路店）", "time": "14:00", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "办理入住后先补水、充电和避暑，不急着铺开行程。", "openingHours": "按订单办理入住", "ticketPrice": "已预订", "transport": {"mode": "步行 / 电动车", "fare": "—", "duration": "按抵达位置"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "潮宗街", "time": "17:30–19:00", "lat": 28.2065, "lng": 112.9681, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "从住处短骑进入老城街巷，作为长沙的低强度开场。", "openingHours": "街区全天开放", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "五一广场 / IFS", "time": "19:30–21:30", "lat": 28.2021, "lng": 112.9839, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "用商圈夜景和第一顿湘菜完成到达日，不追多个排队点。", "openingHours": "商圈按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "晚餐", "place": "五一商圈湘菜（现场择一家排队较短的）", "hours": "以门店当日为准", "dishes": [{"name": "小炒黄牛肉", "price": "约 ¥50–80"}, {"name": "辣椒炒肉", "price": "约 ¥35–55"}]},
+        {"meal": "夜间加餐", "place": "潮宗街 / 五一商圈", "hours": "以门店当日为准", "dishes": [{"name": "臭豆腐", "price": "约 ¥10–20"}, {"name": "糖油粑粑", "price": "约 ¥5–12"}]}
+      ]
+    },
+    {
+      "date": "2026-08-24",
+      "weekday": "周一",
+      "theme": "雨天弹性 · 城市休整",
+      "tips": ["湖南博物院周一闭馆，今天不排硬性核心景点；有雨就把户外湘江段完全取消。"],
+      "alternatives": [{"label": "有雨方案", "summary": "IFS、商场、咖啡馆和就近湘菜；保持低强度。"}, {"label": "无雨方案", "summary": "17:30 后加湘江风光带散步，天黑前回到市中心。"}],
+      "slots": [
+        {"period": "morning", "name": "酒店慢早餐 / 补给", "time": "09:30–11:00", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.2, "review": "第一天不早起，把睡眠、饮水和电量当成后续行程的余量。", "openingHours": "—", "ticketPrice": "—", "transport": {"mode": "步行", "fare": "—", "duration": "—"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "IFS / 五一商圈", "time": "12:00–16:30", "lat": 28.2016, "lng": 112.9817, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Changsha_IFS_2021.jpg/1920px-Changsha_IFS_2021.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "用空调环境承接雨天和高温，午后不安排骑行穿城。", "openingHours": "按商场公告", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "湘江风光带（天气允许）", "time": "17:30–19:00", "lat": 28.1998, "lng": 112.9706, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "雨停后再去江边，若雷雨未停就留在市中心用餐。", "openingHours": "全天开放", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 12 分钟"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "早餐", "place": "酒店附近粉店", "hours": "以门店当日为准", "dishes": [{"name": "肉丝米粉", "price": "约 ¥12–20"}, {"name": "糖油粑粑", "price": "约 ¥5–12"}]},
+        {"meal": "晚餐", "place": "五一商圈湘菜", "hours": "避开 18:00–20:00 取号", "dishes": [{"name": "剁椒鱼头", "price": "约 ¥80–150"}, {"name": "时蔬", "price": "约 ¥18–35"}]}
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "weekday": "周二",
+      "theme": "马王堆 · 湖南历史",
+      "tips": ["博物院 16:00 停止入馆，优先预约 9:00–10:00 时段；参观后只去隔壁烈士公园，避免折返。"],
+      "slots": [
+        {"period": "morning", "name": "湖南博物院", "time": "09:00–12:00", "lat": 28.2143, "lng": 112.9864, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Entrance_of_Hunan_Museum%2C_2018-09-28.jpg/1920px-Entrance_of_Hunan_Museum%2C_2018-09-28.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.8, "review": "以马王堆汉墓陈列和湖南历史陈列为主，别把时间切得过碎。", "openingHours": "周二至周日 09:00–17:00，16:00 停止入馆", "closedDays": "周一闭馆，法定节假日以公告为准", "ticketPrice": "免费，需实名分时预约", "transport": {"mode": "电动车", "fare": "—", "duration": "约 12–18 分钟"}, "needsBooking": true, "leadDays": 3},
+        {"period": "noon", "name": "博物院周边午餐 / 回酒店避暑", "time": "12:10–16:30", "lat": 28.2129, "lng": 112.9876, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/New_building_of_Hunan_Museum_20230403a.jpg/1920px-New_building_of_Hunan_Museum_20230403a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.3, "review": "下午不在户外暴晒，回酒店补觉或在附近室内休息。", "openingHours": "—", "ticketPrice": "—", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "烈士公园", "time": "17:30–19:00", "lat": 28.2139, "lng": 112.9937, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Hunan_Provincial_Museum%2C_Changsha_%2810112446973%29.jpg/1920px-Hunan_Provincial_Museum%2C_Changsha_%2810112446973%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "从博物院向东接一段绿荫散步，遇雨则直接回市中心晚餐。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "午餐", "place": "博物院周边简餐", "hours": "以门店当日为准", "dishes": [{"name": "盖码粉", "price": "约 ¥15–28"}, {"name": "小炒肉套餐", "price": "约 ¥30–50"}]},
+        {"meal": "晚餐", "place": "开福区湘菜", "hours": "建议 17:00 前取号", "dishes": [{"name": "小炒黄牛肉", "price": "约 ¥50–80"}, {"name": "擂辣椒皮蛋", "price": "约 ¥20–35"}]}
+      ]
+    },
+    {
+      "date": "2026-08-26",
+      "weekday": "周三",
+      "theme": "城墙简牍 · 橘洲日落",
+      "tips": ["橘子洲放到傍晚；岛上步行距离长，不带电动车进岛，直接地铁进出。"],
+      "slots": [
+        {"period": "morning", "name": "天心阁", "time": "08:30–10:00", "lat": 28.1894, "lng": 112.9880, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Attic_area_of_Tianxin_Pavilion%2C_Changsha.jpg/1920px-Attic_area_of_Tianxin_Pavilion%2C_Changsha.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "趁上午较凉时看古城墙与阁楼，具体开放、票务以前一天公告为准。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车", "fare": "—", "duration": "约 12–18 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "长沙简牍博物馆", "time": "10:20–12:00", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Tianxin_Pavilion_in_Changsha_20250310.jpg/1920px-Tianxin_Pavilion_in_Changsha_20250310.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "从城墙转入室内，节奏更适合酷热与阵雨时段。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "橘子洲", "time": "17:00–20:00", "lat": 28.1878, "lng": 112.9558, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Orange_Isle_2021122601.jpg/1920px-Orange_Isle_2021122601.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "把最晒的时间留在室内，傍晚再进岛看湘江两岸的光线变化。", "openingHours": "以景区当日公告为准", "ticketPrice": "免费，观光车另计且以现场为准", "transport": {"mode": "地铁 + 步行", "fare": "按实际线路", "duration": "约 30–45 分钟"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "午餐", "place": "南门口附近", "hours": "以门店当日为准", "dishes": [{"name": "口味虾", "price": "约 ¥100–180 / 份"}, {"name": "紫苏桃子姜", "price": "约 ¥15–30"}]},
+        {"meal": "晚餐", "place": "橘子洲返程后市中心", "hours": "以门店当日为准", "dishes": [{"name": "米粉", "price": "约 ¥12–25"}, {"name": "臭豆腐", "price": "约 ¥10–20"}]}
+      ]
+    },
+    {
+      "date": "2026-08-27",
+      "weekday": "周四",
+      "theme": "岳麓山下 · 大学城",
+      "tips": ["电动车只骑到岳麓山脚或大学城外围；书院与爱晚亭的步行段留足水和体力。"],
+      "slots": [
+        {"period": "morning", "name": "岳麓书院", "time": "08:30–10:30", "lat": 28.1839, "lng": 112.9351, "photo": "https://upload.wikimedia.org/wikipedia/commons/3/32/Yuelu-Academy-Gate.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "rating": 4.7, "review": "早到避开人流与闷热，重点感受书院建筑和院落秩序。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车到山脚 + 步行", "fare": "—", "duration": "约 25–35 分钟"}, "needsBooking": true, "leadDays": 2},
+        {"period": "noon", "name": "爱晚亭 / 湖南大学周边", "time": "10:40–14:30", "lat": 28.1841, "lng": 112.9320, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/%E5%B2%B3%E9%BA%93%E4%B9%A6%E9%99%A2%E6%95%99%E5%AD%A6%E6%96%8B_20251018.jpg/1920px-%E5%B2%B3%E9%BA%93%E4%B9%A6%E9%99%A2%E6%95%99%E5%AD%A6%E6%96%8B_20251018.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "短看爱晚亭后尽快下山午餐，不把盛夏正午留在登高路段。", "openingHours": "以景区当日公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 10–20 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "大学城 / 后湖片区", "time": "17:00–20:00", "lat": 28.1788, "lng": 112.9453, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "用大学城的晚餐收束西岸日，不再追一个跨城夜景。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "午餐", "place": "湖南大学周边", "hours": "以门店当日为准", "dishes": [{"name": "盖码粉", "price": "约 ¥15–28"}, {"name": "长沙小炒", "price": "约 ¥35–65"}]},
+        {"meal": "晚餐", "place": "大学城", "hours": "避开 18:00 后高峰", "dishes": [{"name": "辣椒炒肉", "price": "约 ¥35–55"}, {"name": "冰粉 / 凉面", "price": "约 ¥8–20"}]}
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "weekday": "周五",
+      "theme": "江阁旧城 · 南门口",
+      "tips": ["今天的点位集中在老城南段；中午进入简牍博物馆或回酒店，不在城墙与江边硬晒。"],
+      "slots": [
+        {"period": "morning", "name": "杜甫江阁", "time": "09:00–10:30", "lat": 28.1906, "lng": 112.9754, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Xiangjiang_River_4.jpg/1920px-Xiangjiang_River_4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "早上看湘江与阁楼外观，逆光少、体感也比正午舒适。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "长沙简牍博物馆（雨天优先）", "time": "10:50–12:30", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Tianxin_Pavilion_in_Changsha_20250310.jpg/1920px-Tianxin_Pavilion_in_Changsha_20250310.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "若 26 日已完整参观，可把这段换成回酒店休息或一家甜品店。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 8 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "南门口 / 坡子街", "time": "17:30–20:30", "lat": 28.1844, "lng": 112.9805, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "晚上只选一条街慢吃，避免在高峰把时间耗在跨城排队上。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "午餐", "place": "南门口附近", "hours": "以门店当日为准", "dishes": [{"name": "猪油拌粉", "price": "约 ¥12–20"}, {"name": "凉菜", "price": "约 ¥10–25"}]},
+        {"meal": "晚餐", "place": "南门口 / 坡子街", "hours": "建议先逛后按排队选店", "dishes": [{"name": "臭豆腐", "price": "约 ¥10–20"}, {"name": "口味蟹 / 口味虾", "price": "约 ¥100–220 / 份"}]}
+      ]
+    },
+    {
+      "date": "2026-08-29",
+      "weekday": "周六",
+      "theme": "洋湖艺术日 · 低速漫游",
+      "tips": ["往返距离远于前几日。只有电量至少 60%、天气稳定且愿意骑约 20 km 时才骑电动车；否则全程地铁/打车。"],
+      "alternatives": [{"label": "电量与天气都好", "summary": "清晨骑去洋湖，午后入美术馆，傍晚再回。"}, {"label": "下雨或不想远骑", "summary": "用长沙博物馆与市中心商场替换，不影响主线完成度。"}],
+      "slots": [
+        {"period": "morning", "name": "洋湖湿地", "time": "08:30–10:00", "lat": 28.1190, "lng": 112.9374, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Xie_Zilong_Photography_Museum_2023040102.jpg/1920px-Xie_Zilong_Photography_Museum_2023040102.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "早到看水岸与绿地，气温升高前离开户外。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "电动车或地铁", "fare": "按实际线路", "duration": "电动车约 35–45 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "李自健美术馆", "time": "10:20–13:00", "lat": 28.1157, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Xie_Zilong_Photography_Museum_2023040102.jpg/1920px-Xie_Zilong_Photography_Museum_2023040102.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "把正午交给室内展览，临展与开放日以馆方公告为准。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "谢子龙影像艺术馆", "time": "14:00–16:30", "lat": 28.1213, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Xie_Zilong_Photography_Museum_2023040108.jpg/1920px-Xie_Zilong_Photography_Museum_2023040108.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "视闭馆时间决定是否完整停留；离馆后直接返程，避免夜骑远距离。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行后返程", "fare": "按实际线路", "duration": "—"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "午餐", "place": "洋湖周边", "hours": "以门店当日为准", "dishes": [{"name": "简餐 / 粉面", "price": "约 ¥20–45"}, {"name": "冰饮", "price": "约 ¥12–30"}]},
+        {"meal": "晚餐", "place": "回到开福区后就近", "hours": "不再跨城找店", "dishes": [{"name": "清淡湘菜", "price": "约 ¥40–80 / 人"}, {"name": "甜品", "price": "约 ¥15–35"}]}
+      ]
+    },
+    {
+      "date": "2026-08-30",
+      "weekday": "周日",
+      "theme": "退房返程 · 不赶景点",
+      "tips": ["12:00 前退房。未提供返程时间，因此不预设景点；把行李、充电器与雨具列为最后检查项。"],
+      "slots": [
+        {"period": "morning", "name": "酒店退房", "time": "08:30–12:00", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.2, "review": "慢早餐、收拾行李，留足退房与前往车站/机场的缓冲。", "openingHours": "12:00 前退房", "ticketPrice": "已预订", "transport": {"mode": "按返程交通", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "中山路附近收尾午餐", "time": "12:00–13:00", "lat": 28.2065, "lng": 112.9681, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Changsha_IFS_%28Picture2%29.jpg/1920px-Changsha_IFS_%28Picture2%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.2, "review": "只有返程在下午时再安排；早班返程则直接跳过。", "openingHours": "以门店当日为准", "ticketPrice": "按实际消费", "transport": {"mode": "步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "evening", "name": "返程（待补交通）", "time": "按订单", "lat": 28.2084, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Xiang_River_in_Changsha.JPG/1920px-Xiang_River_in_Changsha.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.0, "review": "交通信息补齐后，可把这里替换为准确的出发时间与接驳。", "openingHours": "—", "ticketPrice": "待补", "transport": {"mode": "待补", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0}
+      ],
+      "dining": [
+        {"meal": "早餐", "place": "酒店附近粉店", "hours": "以门店当日为准", "dishes": [{"name": "牛肉粉", "price": "约 ¥15–25"}, {"name": "豆浆", "price": "约 ¥4–10"}]}
+      ]
+    }
+  ]
+}
+  </script>
+
+  <script>
+// Leaflet map engine. Kept standalone so this HTML can be edited and reused safely.
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildNavLink(lat, lng, label, ua) {
+  if (ua && /iPhone|iPad|iPod/.test(ua)) {
+    return 'https://maps.apple.com/?ll=' + lat + ',' + lng + '&q=' + encodeURIComponent(label);
+  }
+  return 'geo:' + lat + ',' + lng + '?q=' + lat + ',' + lng + '(' + encodeURIComponent(label) + ')';
+}
+
+var GCJ_A = 6378245.0;
+var GCJ_EE = 0.00669342162296594323;
+function isInChinaBBox(lat, lng) { return lng >= 72.004 && lng <= 137.8347 && lat >= 0.8293 && lat <= 55.8271; }
+function gcjTransformLat(x, y) {
+  var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+  ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(y * Math.PI) + 40.0 * Math.sin(y / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (160.0 * Math.sin(y / 12.0 * Math.PI) + 320 * Math.sin(y * Math.PI / 30.0)) * 2.0 / 3.0;
+  return ret;
+}
+function gcjTransformLng(x, y) {
+  var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+  ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+  ret += (150.0 * Math.sin(x / 12.0 * Math.PI) + 300.0 * Math.sin(x * Math.PI / 30.0)) * 2.0 / 3.0;
+  return ret;
+}
+function gcj02ToWgs84(lat, lng) {
+  if (!isInChinaBBox(lat, lng)) return { lat: lat, lng: lng };
+  var dLat = gcjTransformLat(lng - 105.0, lat - 35.0);
+  var dLng = gcjTransformLng(lng - 105.0, lat - 35.0);
+  var radLat = lat / 180.0 * Math.PI;
+  var magic = 1 - GCJ_EE * Math.sin(radLat) * Math.sin(radLat);
+  var sqrtMagic = Math.sqrt(magic);
+  dLat = (dLat * 180.0) / ((GCJ_A * (1 - GCJ_EE)) / (magic * sqrtMagic) * Math.PI);
+  dLng = (dLng * 180.0) / (GCJ_A / sqrtMagic * Math.cos(radLat) * Math.PI);
+  return { lat: lat - dLat, lng: lng - dLng };
+}
+function routeCoordinates(points) { return points.map(function (p) { return [p.lat, p.lng]; }); }
+function initTravelMap(elementId, points, opts) {
+  opts = opts || {};
+  var map = L.map(elementId, { scrollWheelZoom: false });
+  L.tileLayer(opts.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: opts.attribution || '© OpenStreetMap contributors', maxZoom: 19
+  }).addTo(map);
+  var ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+  points.forEach(function (p, i) {
+    var icon = L.divIcon({
+      className: 'route-pin',
+      html: '<span class="route-pin__num">' + (i + 1) + '</span>',
+      iconSize: [28, 28], iconAnchor: [14, 14]
+    });
+    L.marker([p.lat, p.lng], { icon: icon }).addTo(map).bindPopup(
+      '<b>' + (i + 1) + '. ' + escapeHTML(p.name) + '</b><br>'
+      + (p.time ? escapeHTML(p.time) + '<br>' : '')
+      + '<a href="' + buildNavLink(p.lat, p.lng, p.name, ua) + '">导航</a>'
+    );
+  });
+  var coords = routeCoordinates(points);
+  if (coords.length > 1) L.polyline(coords, { dashArray: '6 8', weight: 2, color: '#e55338', opacity: 0.72 }).addTo(map);
+  map.fitBounds(coords.length ? coords : [[0, 0]], { padding: [30, 30] });
+  return map;
+}
+  </script>
+
+  <script>
+// Departure checklist engine. Kept standalone for the downloadable single-file plan.
+function computeReminders(startDateISO, items) {
+  return items.map(function (it) {
+    var d = new Date(startDateISO + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() - it.leadDays);
+    return { item: it.item, leadDays: it.leadDays, deadline: d.toISOString().slice(0, 10) };
+  }).sort(function (a, b) { return a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0; });
+}
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function renderChecklistHTML(reminders) {
+  var lis = reminders.map(function (r) {
+    return '<li class="todo-item"><input type="checkbox"> <span class="todo-deadline">'
+      + r.deadline + '前</span> <span class="todo-text">' + escapeHTML(r.item)
+      + '（建议提前' + r.leadDays + '天）</span></li>';
+  }).join('');
+  return '<ul class="pretrip-todo">' + lis + '</ul>';
+}
+function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 建议提前' + leadDays + '天订</span>'; }
+  </script>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    (function () {
+      var trip = JSON.parse(document.getElementById('trip-data').textContent);
+      var icon = function (name) { return '<i data-lucide="' + name + '" aria-hidden="true"></i>'; };
+      var periodLabel = { morning: '上午', noon: '午后', evening: '傍晚' };
+      var storageKey = 'changsha-trip-checklist-2026';
+
+      function photoHTML(slot) {
+        var image = slot.photo ? '<img src="' + escapeHTML(slot.photo) + '" alt="' + escapeHTML(slot.name) + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'is-fallback\')">' : '';
+        return '<div class="slot-photo">' + image + '<span class="photo-label">' + escapeHTML(slot.name) + '</span></div>';
+      }
+
+      function metaHTML(slot) {
+        var items = [];
+        if (slot.rating) items.push('<li class="rating">' + icon('star') + '参考 ' + escapeHTML(slot.rating) + '</li>');
+        if (slot.openingHours) items.push('<li>' + icon('clock-3') + escapeHTML(slot.openingHours) + '</li>');
+        if (slot.closedDays) items.push('<li>' + icon('calendar-x') + escapeHTML(slot.closedDays) + '</li>');
+        if (slot.ticketPrice) items.push('<li>' + icon('ticket') + escapeHTML(slot.ticketPrice) + '</li>');
+        if (slot.transport) items.push('<li>' + icon('bike') + escapeHTML(slot.transport.mode) + ' · ' + escapeHTML(slot.transport.duration) + '</li>');
+        return '<ul class="meta-list">' + items.join('') + '</ul>';
+      }
+
+      function renderChecklist() {
+        var checklist = document.getElementById('checklist');
+        var reminders = computeReminders(trip.startDate, trip.reminders);
+        checklist.innerHTML = renderChecklistHTML(reminders);
+        var saved = {};
+        try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (error) { saved = {}; }
+        checklist.querySelectorAll('input').forEach(function (input, index) {
+          var key = reminders[index].item;
+          input.checked = Boolean(saved[key]);
+          input.closest('.todo-item').classList.toggle('is-done', input.checked);
+          input.addEventListener('change', function () {
+            saved[key] = input.checked;
+            try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (error) { /* Local storage can be unavailable in private contexts. */ }
+            input.closest('.todo-item').classList.toggle('is-done', input.checked);
+          });
+        });
+      }
+
+      function renderPreTrip() {
+        var data = [
+          { icon: 'cloud-sun-rain', title: '天气与应对', text: trip.preTrip.weather.summary + ' ' + trip.preTrip.weather.typhoon },
+          { icon: 'shirt', title: '穿搭', text: trip.preTrip.packing },
+          { icon: 'wallet-cards', title: '支付与电量', text: trip.preTrip.payment },
+          { icon: 'smartphone', title: '随身 App', apps: trip.preTrip.apps },
+          { icon: 'ticket-check', title: '预约时机', text: trip.preTrip.ticketTip }
+        ];
+        document.getElementById('pretrip-grid').innerHTML = data.map(function (item) {
+          var body = item.apps ? '<ul class="app-list">' + item.apps.map(function (app) { return '<li>' + escapeHTML(app) + '</li>'; }).join('') + '</ul>' : '<p>' + escapeHTML(item.text) + '</p>';
+          return '<article class="glass-panel info-item"><h3>' + icon(item.icon) + escapeHTML(item.title) + '</h3>' + body + '</article>';
+        }).join('');
+      }
+
+      function renderStay() {
+        var flights = trip.flights;
+        document.getElementById('flight-card').innerHTML = '<h3>抵离交通</h3><p class="empty-state">' + escapeHTML(flights.note) + '</p>';
+        var area = trip.hotelAreas[0];
+        var option = area.options[0];
+        document.getElementById('hotel-card').innerHTML = '<h3>住宿 · ' + escapeHTML(area.area) + '</h3><p>' + escapeHTML(area.reason) + '</p><div class="booked-line"><span class="status-badge">' + escapeHTML(option.tier) + '</span><div><strong>' + escapeHTML(option.name) + '</strong><span>' + escapeHTML(option.priceRange) + ' · ' + escapeHTML(option.note) + '</span></div></div>';
+        document.getElementById('disclaimer').innerHTML = icon('circle-alert') + '<p>' + escapeHTML(trip.disclaimer) + '</p>';
+      }
+
+      function renderDays() {
+        var dayNav = document.getElementById('day-nav');
+        var dayList = document.getElementById('day-list');
+        dayNav.innerHTML = trip.days.map(function (day, index) {
+          return '<button class="day-jump' + (index === 0 ? ' is-active' : '') + '" type="button" data-day-target="day-' + index + '" aria-label="跳转至第 ' + (index + 1) + ' 天">D' + (index + 1) + '</button>';
+        }).join('');
+        dayList.innerHTML = trip.days.map(function (day, index) {
+          var tips = (day.tips || []).map(function (tip) { return '<p class="day-tip">' + icon('cloud-rain') + '<span>' + escapeHTML(tip) + '</span></p>'; }).join('');
+          var slots = day.slots.map(function (slot) {
+            return '<article class="glass-panel slot"><div class="slot-period">' + periodLabel[slot.period] + '</div><div class="slot-main">'
+              + photoHTML(slot)
+              + '<div class="slot-title"><h4>' + escapeHTML(slot.name) + '</h4><span class="slot-time">' + escapeHTML(slot.time) + '</span></div>'
+              + '<p class="slot-review">' + escapeHTML(slot.review) + '</p>'
+              + metaHTML(slot)
+              + (slot.needsBooking ? '<div style="margin-top:8px">' + reminderBadgeHTML(slot.leadDays) + '</div>' : '')
+              + '</div></article>';
+          }).join('');
+          var dining = (day.dining || []).map(function (meal) {
+            return '<article class="glass-panel dining-card"><div class="dining-top"><strong>' + escapeHTML(meal.meal) + ' · ' + escapeHTML(meal.place) + '</strong><span>' + escapeHTML(meal.hours) + '</span></div><div class="dishes">'
+              + meal.dishes.map(function (dish) { return '<span class="dish">' + escapeHTML(dish.name) + '<b>' + escapeHTML(dish.price) + '</b></span>'; }).join('') + '</div></article>';
+          }).join('');
+          var alternatives = (day.alternatives || []).map(function (alt) { return '<div class="alternative"><strong>' + escapeHTML(alt.label) + '</strong><span>' + escapeHTML(alt.summary) + '</span></div>'; }).join('');
+          return '<article class="day-block" id="day-' + index + '"><div class="day-head"><div class="day-date"><span class="day-index">DAY ' + String(index + 1).padStart(2, '0') + '</span><h3>' + escapeHTML(day.date.slice(5).replace('-', ' 月 ')) + ' 日 · ' + escapeHTML(day.weekday) + '</h3></div><p class="day-theme">' + escapeHTML(day.theme) + '</p></div>' + tips + '<div class="slots">' + slots + '</div>' + (alternatives ? '<div class="alternatives">' + alternatives + '</div>' : '') + '<div class="dining">' + dining + '</div></article>';
+        }).join('');
+        dayNav.querySelectorAll('.day-jump').forEach(function (button) {
+          button.addEventListener('click', function () {
+            document.getElementById(button.dataset.dayTarget).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            dayNav.querySelectorAll('.day-jump').forEach(function (item) { item.classList.remove('is-active'); });
+            button.classList.add('is-active');
+          });
+        });
+      }
+
+      function renderTips() {
+        document.getElementById('tips-list').innerHTML = trip.tips.map(function (tip) {
+          return '<li class="glass-panel">' + icon('lightbulb') + '<span>' + escapeHTML(tip) + '</span></li>';
+        }).join('');
+      }
+
+      function renderMap() {
+        var points = trip.days.reduce(function (all, day) {
+          return all.concat(day.slots.map(function (slot) { return { lat: slot.lat, lng: slot.lng, name: slot.name, time: day.date + ' ' + slot.time }; }));
+        }, []);
+        var mapElement = document.getElementById('map');
+        if (!window.L) {
+          mapElement.innerHTML = '<div class="map-fallback">地图服务暂时不可用。行程文字和待办仍可离线阅读。</div>';
+          return;
+        }
+        initTravelMap('map', points);
+      }
+
+      renderChecklist();
+      renderPreTrip();
+      renderStay();
+      renderDays();
+      renderTips();
+      renderMap();
+      window.addEventListener('load', function () { if (window.lucide) window.lucide.createIcons(); });
+    }());
+  </script>
+</body>
+</html>
