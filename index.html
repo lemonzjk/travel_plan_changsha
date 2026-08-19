@@ -270,6 +270,20 @@
 
     .info-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 
+    .weather-panel { margin-bottom: 12px; }
+    .weather-panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 9px; }
+    .weather-panel-head h3 { margin: 0; font-size: 16px; }
+    .weather-source { margin: 0; color: var(--muted); font-size: 11px; text-align: right; }
+    .weather-strip { display: grid; grid-auto-columns: minmax(128px, 1fr); grid-auto-flow: column; gap: 8px; overflow-x: auto; padding: 2px 1px 8px; scrollbar-width: thin; }
+    .weather-day { min-height: 119px; padding: 12px; }
+    .weather-date { display: block; color: var(--muted); font-size: 11px; }
+    .weather-condition { display: flex; align-items: center; gap: 6px; margin: 7px 0 6px; color: var(--ink); font-size: 13px; font-weight: 760; }
+    .weather-condition svg { width: 16px; height: 16px; color: var(--sky); }
+    .weather-temp { margin: 0; color: var(--ink); font-size: 14px; font-weight: 760; }
+    .weather-rain { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .weather-day.is-risk { border-color: rgba(229, 83, 56, 0.26); background: rgba(255, 239, 235, 0.55); }
+    .weather-day.is-risk .weather-condition svg { color: var(--accent); }
+
     .info-item { padding: 17px; }
     .info-item h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 15px; }
     .info-item h3 svg { width: 17px; height: 17px; color: var(--mint); }
@@ -372,6 +386,12 @@
 
     .day-tip svg { width: 16px; height: 16px; flex: 0 0 auto; }
 
+    .day-weather { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 12px; padding: 10px 12px; border-left: 2px solid var(--mint); color: #3d6260; background: rgba(25, 122, 104, 0.08); font-size: 12px; }
+    .day-weather svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--mint); }
+    .day-weather strong { color: var(--ink); font-size: 12px; }
+    .day-weather.is-risk { border-left-color: var(--accent); color: #87513f; background: rgba(255, 239, 235, 0.7); }
+    .day-weather.is-risk svg { color: var(--accent); }
+
     .slots { display: grid; gap: 10px; }
 
     .slot {
@@ -472,6 +492,8 @@
       .hero-data { grid-template-columns: 1fr 1fr; }
       .section-heading { display: block; }
       .section-heading p { margin-top: 7px; text-align: left; }
+      .weather-panel-head { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .weather-source { text-align: left; }
       .day-head { display: block; }
       .day-theme { margin-top: 5px; text-align: left; }
       .day-list { min-height: 0; }
@@ -530,6 +552,7 @@
           <h2 id="pretrip-heading">8 月出行备忘</h2>
           <p>高温、强日照与午后阵雨是此次排程的主要变量。</p>
         </div>
+        <div class="weather-panel" id="weather-panel" aria-live="polite"></div>
         <div class="info-grid" id="pretrip-grid"></div>
       </div>
     </section>
@@ -588,7 +611,7 @@
   "colorScheme": "湘江雾绿 · 辣椒红 · 晴空蓝",
   "preTrip": {
     "weather": {
-      "summary": "8 月长沙闷热潮湿，日间常超过 30°C；当前短期预报对 8/23–8/25 显示有雨，户外项目放在清晨或 17:00 后。",
+      "summary": "8 月长沙闷热潮湿，日间常超过 30°C；此行前半段预报有较高阵雨、雷暴概率，室内项目优先，江边、山路与长距离骑行按当日小时预报执行。",
       "typhoon": "雷雨时停止骑行并远离江边、树下和高处；出发前 48 小时再次查看长沙气象预警与小时预报。"
     },
     "packing": "速干短袖、防晒衣、遮阳帽、晴雨两用伞、防滑凉鞋；博物馆和商场空调强，随身放一件薄外套。",
@@ -599,7 +622,7 @@
   "flights": {
     "booked": [],
     "candidates": [],
-    "note": "尚未提供抵达长沙和离开长沙的交通信息，页面保留此处，后续可直接补入班次或车次。"
+    "note": "尚未提供抵达长沙和离开长沙的交通信息。返程日先确认酒店行李寄存、出发站/机场与最晚离店时间，再补入班次或车次。"
   },
   "hotelAreas": [
     {
@@ -621,15 +644,30 @@
     "不把电动车骑进橘子洲和岳麓山景区。到景区外围按现场规则停车，徒步进入；岳麓山登高不安排在正午。",
     "湖南博物院安排在周二，因为官方说明周一闭馆。8/25 的票按当前规则应在 8/20 20:00 起关注预约。",
     "热门湘菜馆尽量避开 12:00–13:00、18:00–20:00；米粉可作为早餐或晚间补给，口味虾与正餐安排在非高峰取号。",
-    "雨天把江边、橘子洲和山路延期，优先博物院、简牍博物馆、商场或美术馆；雷电时不在江边和树下停留。",
+    "雨天把江边、橘子洲和山路延期，优先博物院、贾谊故居、商场或美术馆；雷电时不在江边和树下停留。",
     "每日出发前看电量、刹车、胎压和雨具；不要因导航绕路进入机动车快速路或禁行区域。"
   ],
   "reminders": [
     {"item": "关注湖南博物院 8/25 实名分时票（每天 20:00 放最新一日）", "leadDays": 3},
     {"item": "核实岳麓书院、天心阁、简牍博物馆的开放与票务", "leadDays": 2},
     {"item": "查看小时天气，准备雨具、防晒与一件薄外套", "leadDays": 2},
-    {"item": "电动车满电、检查刹车胎压、确认停车点", "leadDays": 1}
+    {"item": "电动车满电、检查刹车胎压、确认停车点", "leadDays": 1},
+    {"item": "确认返程交通、酒店行李寄存与最晚出发时间", "leadDays": 1}
   ],
+  "weatherSnapshot": {
+    "updatedAt": "2026-08-19T11:20:00+08:00",
+    "source": "Open-Meteo 预报快照",
+    "days": [
+      {"date": "2026-08-23", "code": 96, "max": 30.7, "min": 25.6, "rainChance": 91, "rainMm": 13.8},
+      {"date": "2026-08-24", "code": 96, "max": 30.2, "min": 25.0, "rainChance": 80, "rainMm": 11.1},
+      {"date": "2026-08-25", "code": 51, "max": 31.8, "min": 26.3, "rainChance": 79, "rainMm": 4.8},
+      {"date": "2026-08-26", "code": 96, "max": 31.3, "min": 27.0, "rainChance": 61, "rainMm": 7.2},
+      {"date": "2026-08-27", "code": 96, "max": 29.6, "min": 25.1, "rainChance": 45, "rainMm": 12.6},
+      {"date": "2026-08-28", "code": 51, "max": 24.8, "min": 22.1, "rainChance": 45, "rainMm": 2.1},
+      {"date": "2026-08-29", "code": 51, "max": 28.9, "min": 21.2, "rainChance": 45, "rainMm": 2.7},
+      {"date": "2026-08-30", "code": 51, "max": 29.0, "min": 22.3, "rainChance": 38, "rainMm": 1.8}
+    ]
+  },
   "days": [
     {
       "date": "2026-08-23",
@@ -710,11 +748,12 @@
     {
       "date": "2026-08-28",
       "weekday": "周五",
-      "theme": "江阁旧城 · 南门口",
-      "tips": ["今天的点位集中在老城南段；中午进入简牍博物馆或回酒店，不在城墙与江边硬晒。"],
+      "theme": "江阁故居 · 南门口",
+      "tips": ["今天的点位集中在老城南段。若有雷雨，杜甫江阁不久留江边，直接转入贾谊故居与太平街一带。"],
+      "alternatives": [{"label": "有雨 / 雷暴", "summary": "跳过江边外观，从贾谊故居开始；午后回酒店或在太平街室内休息。"}, {"label": "天气稳定", "summary": "先看杜甫江阁，再步行约 15 分钟到贾谊故居与太平街。"}],
       "slots": [
         {"period": "morning", "name": "杜甫江阁", "time": "09:00–10:30", "lat": 28.1906, "lng": 112.9754, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Du_Fu_Jiang_Ge_%28Riverside_Pavilion_of_Du_Fu%29%2C_2010092701.jpg/1920px-Du_Fu_Jiang_Ge_%28Riverside_Pavilion_of_Du_Fu%29%2C_2010092701.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "早上看湘江与阁楼外观，逆光少、体感也比正午舒适。", "openingHours": "以景区当日公告为准", "ticketPrice": "门票参考，以官方为准", "transport": {"mode": "电动车", "fare": "—", "duration": "约 15 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "noon", "name": "长沙简牍博物馆（雨天优先）", "time": "10:50–12:30", "lat": 28.1883, "lng": 112.9776, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bamboo_slips_and_wooden_tablets_for_Taxes_and_Levies%2C_Changsha_Jiandu_Museum%2C_picture1.jpg/1920px-Bamboo_slips_and_wooden_tablets_for_Taxes_and_Levies%2C_Changsha_Jiandu_Museum%2C_picture1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.4, "review": "若 26 日已完整参观，可把这段换成回酒店休息或一家甜品店。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 8 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "贾谊故居 / 太平街", "time": "10:50–12:30", "lat": 28.1960, "lng": 112.9663, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/%E8%B4%BE%E8%B0%8A%E6%95%85%E5%B1%85.jpg/1920px-%E8%B4%BE%E8%B0%8A%E6%95%85%E5%B1%85.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "用故居与太平街替代重复的简牍博物馆；雨天也比江边和城墙段更从容。", "openingHours": "以故居当日公告为准", "ticketPrice": "以现场公告为准", "transport": {"mode": "步行 / 电动车", "fare": "—", "duration": "约 10–15 分钟"}, "needsBooking": false, "leadDays": 0},
         {"period": "evening", "name": "南门口 / 坡子街", "time": "17:30–20:30", "lat": 28.1844, "lng": 112.9805, "photo": null, "rating": 4.5, "review": "晚上只选一条街慢吃，避免在高峰把时间耗在跨城排队上。", "openingHours": "街区按各店营业", "ticketPrice": "免费", "transport": {"mode": "电动车 + 步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
@@ -725,13 +764,13 @@
     {
       "date": "2026-08-29",
       "weekday": "周六",
-      "theme": "洋湖艺术日 · 低速漫游",
-      "tips": ["往返距离远于前几日。只有电量至少 60%、天气稳定且愿意骑约 20 km 时才骑电动车；否则全程地铁/打车。"],
-      "alternatives": [{"label": "电量与天气都好", "summary": "清晨骑去洋湖，午后入美术馆，傍晚再回。"}, {"label": "下雨或不想远骑", "summary": "用长沙博物馆与市中心商场替换，不影响主线完成度。"}],
+      "theme": "洋湖艺术日 · 公交优先",
+      "tips": ["酒店到洋湖单程实际距离较远，默认地铁或打车往返；电动车仅用于市区短接驳，不安排全程骑行。"],
+      "alternatives": [{"label": "天气稳定", "summary": "早到洋湖湿地，再步行串联两座美术馆；回程仍用地铁或打车。"}, {"label": "下雨 / 雷雨", "summary": "跳过洋湖湿地，直接到两座美术馆；若雨势大则改为市中心室内日。"}],
       "slots": [
-        {"period": "morning", "name": "洋湖湿地", "time": "08:30–10:00", "lat": 28.1190, "lng": 112.9374, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Egret_Tower_in_Yanghu_Wetland_Park_2023040107.jpg/1920px-Egret_Tower_in_Yanghu_Wetland_Park_2023040107.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "早到看水岸与绿地，气温升高前离开户外。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "电动车或地铁", "fare": "按实际线路", "duration": "电动车约 35–45 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "morning", "name": "洋湖湿地", "time": "08:30–10:00", "lat": 28.1190, "lng": 112.9374, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Egret_Tower_in_Yanghu_Wetland_Park_2023040107.jpg/1920px-Egret_Tower_in_Yanghu_Wetland_Park_2023040107.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "只在天气稳定时早到看水岸与绿地；有雨则跳过，直接进入美术馆。", "openingHours": "公园以现场公告为准", "ticketPrice": "免费 / 以现场为准", "transport": {"mode": "地铁 / 打车", "fare": "按实时导航", "duration": "预留约 45–70 分钟"}, "needsBooking": false, "leadDays": 0},
         {"period": "noon", "name": "李自健美术馆", "time": "10:20–13:00", "lat": 28.1157, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Li_Zijian_Art_Museum_2023040104.jpg/1920px-Li_Zijian_Art_Museum_2023040104.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.6, "review": "把正午交给室内展览，临展与开放日以馆方公告为准。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行", "fare": "—", "duration": "约 5–10 分钟"}, "needsBooking": false, "leadDays": 0},
-        {"period": "evening", "name": "谢子龙影像艺术馆", "time": "14:00–16:30", "lat": 28.1213, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Xie_Zilong_Photography_Museum_2023040108.jpg/1920px-Xie_Zilong_Photography_Museum_2023040108.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "视闭馆时间决定是否完整停留；离馆后直接返程，避免夜骑远距离。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "步行后返程", "fare": "按实际线路", "duration": "—"}, "needsBooking": false, "leadDays": 0}
+        {"period": "evening", "name": "谢子龙影像艺术馆", "time": "14:00–16:30", "lat": 28.1213, "lng": 112.9417, "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Xie_Zilong_Photography_Museum_2023040108.jpg/1920px-Xie_Zilong_Photography_Museum_2023040108.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "rating": 4.5, "review": "视闭馆时间决定是否完整停留；离馆后用地铁或打车返程，不安排远距离夜骑。", "openingHours": "以馆方当日公告为准", "ticketPrice": "以馆方公告为准", "transport": {"mode": "地铁 / 打车返程", "fare": "按实时导航", "duration": "预留约 45–70 分钟"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
         {"meal": "午餐", "place": "洋湖周边", "hours": "以门店当日为准", "dishes": [{"name": "简餐 / 粉面", "price": "约 ¥20–45"}, {"name": "冰饮", "price": "约 ¥12–30"}]},
@@ -742,10 +781,10 @@
       "date": "2026-08-30",
       "weekday": "周日",
       "theme": "退房返程 · 不赶景点",
-      "tips": ["12:00 前退房。未提供返程时间，因此不预设景点；把行李、充电器与雨具列为最后检查项。"],
+      "tips": ["12:00 前退房。先确认酒店是否可寄存行李及返程时间；未确定前不安排景点，把行李、充电器与雨具列为最后检查项。"],
       "slots": [
-        {"period": "morning", "name": "酒店退房", "time": "08:30–12:00", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.2, "review": "慢早餐、收拾行李，留足退房与前往车站/机场的缓冲。", "openingHours": "12:00 前退房", "ticketPrice": "已预订", "transport": {"mode": "按返程交通", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0},
-        {"period": "noon", "name": "中山路附近收尾午餐", "time": "12:00–13:00", "lat": 28.2065, "lng": 112.9681, "photo": null, "rating": 4.2, "review": "只有返程在下午时再安排；早班返程则直接跳过。", "openingHours": "以门店当日为准", "ticketPrice": "按实际消费", "transport": {"mode": "步行", "fare": "—", "duration": "约 10 分钟"}, "needsBooking": false, "leadDays": 0},
+        {"period": "morning", "name": "酒店退房", "time": "08:30–12:00", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.2, "review": "慢早餐、收拾行李，确认酒店行李寄存与前往车站/机场的接驳。", "openingHours": "12:00 前退房", "ticketPrice": "已预订", "transport": {"mode": "按返程交通", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0},
+        {"period": "noon", "name": "行李寄存 / 返程缓冲", "time": "12:00 起", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.2, "review": "返程在下午或晚上时再寄存行李、就近用餐；早班返程则直接前往车站或机场。", "openingHours": "以酒店与返程时间为准", "ticketPrice": "按实际消费", "transport": {"mode": "步行 / 接驳", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0},
         {"period": "evening", "name": "返程（待补交通）", "time": "按订单", "lat": 28.2084, "lng": 112.9776, "photo": null, "rating": 4.0, "review": "交通信息补齐后，可把这里替换为准确的出发时间与接驳。", "openingHours": "—", "ticketPrice": "待补", "transport": {"mode": "待补", "fare": "待补", "duration": "待补"}, "needsBooking": false, "leadDays": 0}
       ],
       "dining": [
@@ -863,6 +902,93 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
       var icon = function (name) { return '<i data-lucide="' + name + '" aria-hidden="true"></i>'; };
       var periodLabel = { morning: '上午', noon: '午后', evening: '傍晚' };
       var storageKey = 'changsha-trip-checklist-2026';
+      var weatherState = trip.weatherSnapshot || { source: '天气待确认', updatedAt: '', days: [] };
+
+      function weatherMeta(code) {
+        if (code >= 95) return { label: '雷暴', icon: 'cloud-lightning' };
+        if (code >= 80) return { label: '阵雨', icon: 'cloud-rain' };
+        if (code >= 61) return { label: '小到大雨', icon: 'cloud-rain' };
+        if (code >= 51) return { label: '毛毛雨 / 小雨', icon: 'cloud-drizzle' };
+        if (code >= 45) return { label: '雾', icon: 'cloud-fog' };
+        if (code === 3) return { label: '阴', icon: 'cloud' };
+        if (code >= 1) return { label: '多云', icon: 'cloud-sun' };
+        return { label: '晴', icon: 'sun' };
+      }
+
+      function weatherEntry(date) {
+        return (weatherState.days || []).find(function (entry) { return entry.date === date; });
+      }
+
+      function isWeatherRisk(entry) {
+        return entry && (Number(entry.code) >= 95 || Number(entry.rainChance) >= 60);
+      }
+
+      function weatherDecision(entry) {
+        if (Number(entry.code) >= 95) return '雷暴风险：不骑行、不去江边和山路';
+        if (Number(entry.rainChance) >= 60) return '降雨概率高：室内项目优先';
+        return '出门前再看小时降雨';
+      }
+
+      function formatWeatherUpdatedAt(value) {
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value || '天气待确认';
+        return date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+
+      function weatherSummaryHTML(date) {
+        var entry = weatherEntry(date);
+        if (!entry) return '';
+        var meta = weatherMeta(Number(entry.code));
+        var risk = isWeatherRisk(entry);
+        return '<div class="day-weather' + (risk ? ' is-risk' : '') + '">' + icon(meta.icon)
+          + '<strong>' + escapeHTML(meta.label) + '</strong><span>' + Math.round(Number(entry.max)) + '° / ' + Math.round(Number(entry.min)) + '°</span>'
+          + '<span>降雨 ' + Math.round(Number(entry.rainChance)) + '%</span><span>' + escapeHTML(weatherDecision(entry)) + '</span></div>';
+      }
+
+      function renderWeather() {
+        var panel = document.getElementById('weather-panel');
+        if (!panel) return;
+        var cards = (weatherState.days || []).map(function (entry) {
+          var meta = weatherMeta(Number(entry.code));
+          var risk = isWeatherRisk(entry);
+          return '<article class="glass-panel weather-day' + (risk ? ' is-risk' : '') + '"><span class="weather-date">' + escapeHTML(entry.date.slice(5).replace('-', ' 月 ') + ' 日') + '</span>'
+            + '<span class="weather-condition">' + icon(meta.icon) + escapeHTML(meta.label) + '</span>'
+            + '<p class="weather-temp">' + Math.round(Number(entry.max)) + '° / ' + Math.round(Number(entry.min)) + '°</p>'
+            + '<p class="weather-rain">降雨 ' + Math.round(Number(entry.rainChance)) + '% · ' + Number(entry.rainMm).toFixed(1) + ' mm</p></article>';
+        }).join('');
+        panel.innerHTML = '<div class="weather-panel-head"><h3>行程天气</h3><p class="weather-source">' + escapeHTML(weatherState.source || '天气预报') + ' · ' + escapeHTML(formatWeatherUpdatedAt(weatherState.updatedAt)) + '</p></div><div class="weather-strip" aria-label="8 月 23 日至 30 日天气预报">' + cards + '</div>';
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      function refreshWeather() {
+        if (!window.fetch) return;
+        var lastDate = trip.days[trip.days.length - 1].date;
+        var url = 'https://api.open-meteo.com/v1/forecast?latitude=28.2282&longitude=112.9388&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&timezone=Asia%2FShanghai&start_date=' + trip.startDate + '&end_date=' + lastDate;
+        window.fetch(url).then(function (response) {
+          if (!response.ok) throw new Error('Weather request failed');
+          return response.json();
+        }).then(function (payload) {
+          if (!payload.daily || !Array.isArray(payload.daily.time)) throw new Error('Weather payload incomplete');
+          weatherState = {
+            source: 'Open-Meteo 更新预报',
+            updatedAt: new Date().toISOString(),
+            days: payload.daily.time.map(function (date, index) {
+              return {
+                date: date,
+                code: payload.daily.weather_code[index],
+                max: payload.daily.temperature_2m_max[index],
+                min: payload.daily.temperature_2m_min[index],
+                rainChance: payload.daily.precipitation_probability_max[index],
+                rainMm: payload.daily.precipitation_sum[index]
+              };
+            })
+          };
+          renderWeather();
+          document.dispatchEvent(new Event('tripweatherchange'));
+        }).catch(function () {
+          // Keep the embedded forecast snapshot when network access is unavailable.
+        });
+      }
 
       function photoHTML(slot) {
         if (!slot.photo) return '';
@@ -957,7 +1083,7 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
               + meal.dishes.map(function (dish) { return '<span class="dish">' + escapeHTML(dish.name) + '<b>' + escapeHTML(dish.price) + '</b></span>'; }).join('') + '</div></article>';
           }).join('');
           var alternatives = (day.alternatives || []).map(function (alt) { return '<div class="alternative"><strong>' + escapeHTML(alt.label) + '</strong><span>' + escapeHTML(alt.summary) + '</span></div>'; }).join('');
-          dayList.innerHTML = '<article class="day-block" id="active-day"><div class="day-head"><div class="day-date"><span class="day-index">DAY ' + String(activeIndex + 1).padStart(2, '0') + '</span><h3>' + escapeHTML(day.date.slice(5).replace('-', ' 月 ')) + ' 日 · ' + escapeHTML(day.weekday) + '</h3></div><p class="day-theme">' + escapeHTML(day.theme) + '</p></div>' + tips + '<div class="slots">' + slots + '</div>' + (alternatives ? '<div class="alternatives">' + alternatives + '</div>' : '') + '<div class="dining">' + dining + '</div></article>';
+          dayList.innerHTML = '<article class="day-block" id="active-day"><div class="day-head"><div class="day-date"><span class="day-index">DAY ' + String(activeIndex + 1).padStart(2, '0') + '</span><h3>' + escapeHTML(day.date.slice(5).replace('-', ' 月 ')) + ' 日 · ' + escapeHTML(day.weekday) + '</h3></div><p class="day-theme">' + escapeHTML(day.theme) + '</p></div>' + weatherSummaryHTML(day.date) + tips + '<div class="slots">' + slots + '</div>' + (alternatives ? '<div class="alternatives">' + alternatives + '</div>' : '') + '<div class="dining">' + dining + '</div></article>';
           label.textContent = day.date.slice(5).replace('-', ' 月 ') + ' 日 · ' + day.weekday;
           themeLabel.textContent = day.theme + ' · 第 ' + (activeIndex + 1) + ' / ' + trip.days.length + ' 天';
           dots.innerHTML = trip.days.map(function (_, index) { return '<span class="day-dot' + (index === activeIndex ? ' is-active' : '') + '"></span>'; }).join('');
@@ -983,6 +1109,7 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
           if (Math.abs(distance) < 48) return;
           moveDay(distance < 0 ? 1 : -1);
         }, { passive: true });
+        document.addEventListener('tripweatherchange', renderActiveDay);
         renderActiveDay();
       }
 
@@ -994,9 +1121,11 @@ function reminderBadgeHTML(leadDays) { return '<span class="reminder-badge">⚠ 
 
       renderChecklist();
       renderPreTrip();
+      renderWeather();
       renderStay();
       renderDays();
       renderTips();
+      refreshWeather();
       window.addEventListener('load', function () { if (window.lucide) window.lucide.createIcons(); });
     }());
   </script>
